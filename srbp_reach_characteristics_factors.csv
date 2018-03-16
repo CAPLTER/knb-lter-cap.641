@@ -1,0 +1,14 @@
+attributeName,code,definition
+reach,Ave35,metadata_not_provided
+reach,Ave67,metadata_not_provided
+reach,BM,metadata_not_provided
+reach,Price,metadata_not_provided
+reach,Priest,metadata_not_provided
+reach,Rio,metadata_not_provided
+reach,Tonto,metadata_not_provided
+urbanized,NonUrban,metadata_not_provided
+urbanized,Urban,metadata_not_provided
+restored,NotRestored,metadata_not_provided
+restored,Restored,metadata_not_provided
+water,Ephemeral,metadata_not_provided
+water,Perennial,metadata_not_provided

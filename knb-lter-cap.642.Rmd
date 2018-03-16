@@ -1,0 +1,466 @@
+---
+title: "knb-lter-cap.641"
+author: "SRE"
+date: "March 16, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+FOR SRBP: there are six birding points at each site, two birding points along
+each of the three transects, yielding, for example, Tonto_mid_B1, Tonto_mid_B2
+(recall that there are three herp plots along each transect). To this point, a
+single birder (formerly Melanie), birded at all six points four times per
+year. The other two birders, birded at a single core site during the two
+regular birding seasons.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
+library(EML)
+library(RPostgreSQL)
+library(RMySQL)
+library(tidyverse)
+library(tools)
+library(readxl)
+library(aws.s3)
+library(capeml)
+```
+
+```{r dataset_details}
+projectid <- 641
+packageIdent <- 'knb-lter-cap.641.2'
+pubDate <- '2018-03-20'
+```
+ 
+```{r helper_functions}
+source('~/localRepos/reml-helper-tools/writeAttributesFn.R')
+source('~/localRepos/reml-helper-tools/createDataTableFromFileFn.R')
+source('~/localRepos/reml-helper-tools/createKMLFn.R')
+source('~/localRepos/reml-helper-tools/address_publisher_contact_language_rights.R')
+source('~/localRepos/reml-helper-tools/createOtherEntityFn.R')
+source('~/localRepos/reml-helper-tools/createPeople.R')
+source('~/localRepos/reml-helper-tools/createFactorsDataframe.R')
+source('~/localRepos/reml-helper-tools/amazon_file_upload.R')
+```
+
+```{r connections::amazon}
+source('~/Documents/localSettings/aws.s3')
+```
+
+```{r connections::postgres::local, eval=F }
+source('~/Documents/localSettings/pg_local.R')
+pg <- pg_local
+```
+
+```{r connections::postgres::prod, eval=T }
+source('~/Documents/localSettings/pg_prod.R')
+pg <- pg_prod
+```
+
+```{r connections::mysql::prod, eval=T }
+source('~/Documents/localSettings/mysql_rds_prod.R')
+prod <- mysql_prod
+```
+
+```{r srbp_birds}
+
+# 2016-12-02. The meaning of 'flying' in the birds table is unclear. There are
+# 1962 records where flying = 1. All of these except for two records have
+# distance = FT. However, not all records where distance = FT have a distance =
+# 1 (any any value for that matter). Adding confusion, in her metadata, Corinna
+# has listed that flying = NULL is true, but then what would be the meaning of
+# flying = 0, and that would mean that most birds were flying. I am not certain,
+# but my impression is that flying was a precursor to FT. A "flying" option is
+# not on the current datasheet, nor on an earlier one revised in 2004. I am
+# going to omit flying from the publication of these data as I think it is more
+# confusing than helpful (and I cannot explain its meaning).
+
+# note that this select statement does not include wind speed, wind dir, air
+# temp, or cloud cover as those variables have not been collected for a long
+# time and are not relevant to the more recent SRBP observations
+
+srbp_birds <- dbGetQuery(prod, "
+SELECT
+  sites.site_code,
+  surveys.survey_date,
+  surveys.time_start,
+  surveys.time_end,
+  surveys.observer,
+  surveys.notes AS survey_notes,
+  surveys.human_activity_notes,
+  surveys.wind,
+  surveys.precipitation,
+  surveys.disturbances,
+  surveys.sight_obstruct,
+  surveys.noise_level,
+  surveys.site_condition,
+  surveys.non_bird_species,
+  bird_taxons.code,
+  bird_taxons.common_name,
+  birds.distance,
+  birds.bird_count,
+  birds.notes AS observation_notes,
+  birds.seen,
+  birds.heard,
+  birds.direction,
+  birds.QCcomment
+FROM lter34birds.surveys
+JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
+JOIN lter34birds.birds ON (surveys.survey_id = birds.survey_id)
+JOIN lter34birds.bird_taxons ON (birds.bird_taxon_id = bird_taxons.id)
+WHERE 
+  sites.sample LIKE 'SRBP'
+ORDER BY survey_date
+LIMIT 500000;")
+
+srbp_birds[srbp_birds == ''] <- NA # lots of missing values, convert to NA
+
+# pulling this code out separately owing to its verbosity for a singular 
+# purpose: getting the intials of the observers and presenting those instead of
+# the full name
+srbp_birds <- srbp_birds %>% 
+  mutate(observer = toupper(observer)) %>% 
+  separate(observer, c("name1", "name2"), " ", remove = T) %>% 
+  mutate(init1 = str_extract(name1, "\\b\\w")) %>% 
+  mutate(init2 = str_extract(name2, "\\b\\w")) %>% 
+  unite(observer_initials, init1, init2, sep = "", remove = T) 
+
+srbp_birds <- srbp_birds %>% 
+  mutate(reach = str_extract(site_code, "^[^_]+")) %>% 
+  mutate(reach = as.factor(reach)) %>% 
+  mutate(survey_date = as.Date(survey_date)) %>% 
+  mutate(wind = as.factor(wind)) %>% 
+  mutate(precipitation = as.factor(precipitation)) %>% 
+  mutate(disturbances = as.factor(disturbances)) %>% 
+  mutate(noise_level = as.factor(noise_level)) %>% 
+  mutate(distance = as.factor(distance)) %>% 
+  mutate(seen = as.factor(seen)) %>% 
+  mutate(heard = as.factor(heard)) %>% 
+  mutate(direction = as.factor(direction)) %>% 
+  select(site_code, reach, survey_date:time_end, observer_initials, survey_notes:QCcomment)
+
+# writeAttributes(srbp_birds) # write data frame attributes to a csv in current dir to edit metadata
+
+srbp_birds_desc <- "bird survey sampling details (site, reach, date, time, observer, site conditions, and notes) and birds surveyed (type, number, distance from observer, behavior)"
+
+data_element_factors <- factorsToFrame(srbp_birds)
+
+# create data table based on metadata provided in the companion csv
+# use createdataTableFn() if attributes and classes are to be passed directly
+srbp_birds_DT <- createDTFF(dfname = srbp_birds,
+                            # factors = data_element_factors,
+                            description = srbp_birds_desc,
+                            dateRangeField = 'survey_date')
+
+```
+
+```{r reach_characteristics}
+
+# not enough detail concerning the SRBP sites in the lter34.sites table to 
+# warrant pulling that information. However, SRBP reach characteristics are
+# relevant so we will publish those details
+
+srbp_reach_characteristics <- dbGetQuery(prod, "
+SELECT 
+  s.site_code
+FROM lter34birds.sites s
+WHERE 
+  s.sample LIKE 'SRBP'
+ORDER BY site_code;") %>% 
+  mutate(reach = str_extract(site_code, "^[^_]+")) %>% 
+  select(site_code, reach)
+
+herps_reach_chars <- dbGetQuery(pg,"
+SELECT 
+  reach,
+  urbanized, 
+  restored, 
+  water
+FROM herpetofauna.river_reaches;")
+
+srbp_reach_characteristics <- inner_join(srbp_reach_characteristics, herps_reach_chars, by = c("reach")) %>% 
+  mutate(reach = as.factor(reach)) %>% 
+  mutate(urbanized = as.factor(urbanized)) %>% 
+  mutate(restored = as.factor(restored)) %>% 
+  mutate(water = as.factor(water)) 
+
+# writeAttributes(srbp_reach_characteristics) # write data frame attributes to a csv in current dir to edit metadata
+
+srbp_reach_characteristics_desc <- "Salt River reach location of each sampling site, and general characteristics of that portion of the river where sampling is conducted"
+
+srbp_reach_characteristics_factors <- factorsToFrame(srbp_reach_characteristics)
+
+# create data table based on metadata provided in the companion csv
+# use createdataTableFn() if attributes and classes are to be passed directly
+srbp_reach_characteristics_DT <- createDTFF(dfname = srbp_reach_characteristics,
+                                            # factors = srbp_reach_characteristics_factors,
+                                            description = srbp_reach_characteristics_desc)
+                                            # dateRangeField = 'runoff_datetime')
+
+```
+
+```{r spatial_data}
+
+# Get the bird survey locations. Here we are extracting these data from the 
+# database as opposed to using an existing shapefile as I am presenting only the
+# most up-to-date location information (as opposed to the locations and their 
+# changes through time). Double-check the query, it worked with the small number
+# of SRBP sites with updated locations at the time these were pulled but not sure
+# its accuracy when the data are more complicated (e.g., a given location having
+# moved multiple times) and note that I am using only year to reflect the most 
+# recent location, if a site moved twice in a year, month would have to be 
+# considered as well. Also note that I had to include blh.end_date_year in the
+# query to be able to include it in the HAVING clause.
+
+# as with the herp plots, I am struggling as to whether it is appropriate to
+# even make the exact points public information from a disturbance standpoint,
+# but also a too-much-knowledge about the organisms standpoint. Finally, now
+# that we are tracking the movement of plots through time, that would have to be
+# encapsulated in this publication so as not to confuse a researcher thinking
+# that all data necessarily come from the same location. Taken together, I think
+# the better approach is to make a polygon that encapsulates all points (curent
+# and historical) at each reach. This provides a user with a reasonable 
+# understanding of the location, but obscures (slightly, anyway) the exact 
+# position details.
+
+# see core birds for the query if you want only the current sites
+
+srbp_bird_locations <- dbGetQuery(prod, "
+SELECT 
+  s.site_code,
+  blh.lat,
+  blh.`long`
+FROM lter34birds.birds_location_histories blh
+JOIN lter34birds.sites s ON (s.site_id = blh.site_id)
+WHERE 
+  s.sample LIKE 'SRBP'
+ORDER BY site_code;") %>% 
+  mutate(reach = str_extract(site_code, "^[^_]+")) %>% 
+  select(reach, lat, long)
+
+# convert tabular data to kml
+library("sp")
+library("rgdal")
+coordinates(srbp_bird_locations) <- c("long", "lat")
+proj4string(srbp_bird_locations) <- CRS("+init=epsg:4326")
+# srbp_bird_locations <- spTransform(srbp_bird_locations, CRS("+proj=longlat +datum=WGS84")) 
+# spTransform not required here as already in WGS 84
+writeOGR(srbp_bird_locations, "srbp_bird_locations.kml", layer = "srbp_bird_locations", driver = "KML")
+
+# in QGIS
+# add the kml file > convex hull (field = reach) > convert to kml (be sure to name fields)
+
+# 2018-03-16: can't we just make it a kml in R, write it, and load it, instead of writing to shapefile, then converting to kml in qgis?
+
+kml_desc <- "bird survey locations at select locations along the Salt River in the greater Phoenix metropolitan area; polygons reflect the combined area of all bird survey locations (current and historic) at each river reach"
+srbp_bird_locations <- createKML(kmlobject = 'srbp_bird_locations.kml',
+                                 description = kml_desc)
+
+```
+
+```{r title}
+title <- 'Point-count bird censusing: long-term monitoring of bird abundance and diversity along the Salt River in the greater Phoenix metropolitan area, ongoing since 2013'
+```
+
+```{r abstract}
+
+# abstract from file or directly as text
+abstract <- as(set_TextType("abstract.md"), "abstract") 
+# abstract <- 'abstract text'
+```
+
+```{r people}
+
+# creators
+heatherBateman <- addCreator('h', 'bateman')
+danChilders <- addCreator('d', 'childers')
+paigeWarren <- addCreator('p', 'warren')
+
+creators <- c(as(heatherBateman, 'creator'),
+              as(danChilders, 'creator'),
+              as(paigeWarren, 'creator'))
+
+# metadata providers
+stevanEarl <- addMetadataProvider('s', 'earl')
+sallyWittlinger <- addMetadataProvider('s', 'wittlinger')
+
+metadataProvider <-c(as(stevanEarl, 'metadataProvider'),
+                     as(sallyWittlinger, 'metadataProvider'))
+
+```
+
+```{r keywords}
+
+# CAP IRTs for reference: https://sustainability.asu.edu/caplter/research/
+# be sure to include these as appropriate
+
+keywordSet <-
+  c(new("keywordSet",
+        keywordThesaurus = "LTER controlled vocabulary",
+        keyword =  c("nutrients",
+                     "dissolved organic carbon",
+                     "dissolved organic nitrogen",
+                     "dissolved inorganic nitrogen",
+                     "rivers",
+                     "discharge",
+                     "water chemistry",
+                     "particulates",
+                     "nitrate",
+                     "nitrite",
+                     "ammonium",
+                     "anions",
+                     "cations",
+                     "chloride",
+                     "phosphorus",
+                     "nitrogen",
+                     "specific conductivity",
+                     "urban",
+                     "runoff",
+                     "watersheds",
+                     "total dissolved nitrogen")),
+    new("keywordSet",
+        keywordThesaurus = "LTER core areas",
+        keyword =  c("water and fluxes",
+                     "parks and rivers",
+                     "movement of organic matter",
+                     "movement of inorganic matter")),
+    new("keywordSet",
+        keywordThesaurus = "Creator Defined Keyword Set",
+        keyword =  c("stormwater",
+                     "catchment")),
+    new("keywordSet",
+        keywordThesaurus = "CAPLTER Keyword Set List",
+        keyword =  c("cap lter",
+                     "cap",
+                     "caplter",
+                     "central arizona phoenix long term ecological research",
+                     "arizona",
+                     "az",
+                     "indian bend wash",
+                     "salt river",
+                     "arid land"))
+  )
+
+```
+
+```{r methods}
+
+methods <- set_methods("methods.md")
+```
+
+```{r coverages}
+
+begindate <- format(min(runoff_chemistry$runoff_datetime), "%Y-%m-%d")
+enddate <- format(max(runoff_chemistry$runoff_datetime), "%Y-%m-%d")
+geographicDescription <- "CAP LTER study area"
+coverage <- set_coverage(begin = begindate,
+                         end = enddate,
+                         geographicDescription = geographicDescription,
+                         west = -112.082, east = -111.865,
+                         north = +33.6149, south = +33.3745)
+```
+
+```{r construct_dataset}
+
+# from sourced file:
+  # address
+  # publisher
+  # contact
+  # rights
+  # distribution
+
+# generate a list of EML dataTables
+listOfDataTables <- lapply(ls(pattern = "_DT"), function(DT) { get(DT) } )
+
+# print list as a safety step
+print(ls(pattern= "_DT"))
+
+# DATASET
+dataset <- new("dataset",
+               title = title,
+               creator = creators,
+               pubDate = pubDate,
+               metadataProvider = metadataProvider,
+               # associatedParty = associatedParty,
+               intellectualRights = rights,
+               abstract = abstract,
+               keywordSet = keywordSet,
+               coverage = coverage,
+               contact = contact,
+               methods = methods,
+               distribution = metadata_dist,
+               dataTable = listOfDataTables,
+               otherEntity = c(stormwater_catchments)) # if other entity is relevant
+
+               # dataTable = c(first_DT,
+               #               second_DT))
+
+```
+
+```{r custom_units, eval=FALSE}
+
+```
+
+```{r construct_eml}
+
+if(exists('unitList')) {
+  eml <- new("eml",
+             schemaLocation = "eml://ecoinformatics.org/eml-2.1.1  http://nis.lternet.edu/schemas/EML/eml-2.1.1/eml.xsd",
+             packageId = packageIdent,
+             scope = "system",
+             system = "knb",
+             access = lter_access,
+             dataset = dataset,
+             additionalMetadata = as(unitList, "additionalMetadata"))
+} else {
+  eml <- new("eml",
+             schemaLocation = "eml://ecoinformatics.org/eml-2.1.1  http://nis.lternet.edu/schemas/EML/eml-2.1.1/eml.xsd",
+             packageId = packageIdent,
+             scope = "system",
+             system = "knb",
+             access = lter_access,
+             dataset = dataset)
+}
+
+```
+
+```{r write_eml}
+
+# write the eml to file
+write_eml(eml, paste0(packageIdent, ".xml"))
+```
+
+```{r preview_data_file_to_upload}
+
+# preview data set files that will be uploaded to S3
+list.files(pattern = paste0(projectid, "_"))
+```
+
+```{r upload_data_S3}
+
+# upload files to S3
+lapply(list.files(pattern = paste0(projectid, "_")), dataToAmz)
+```
+
+```{r clean_up}
+
+# remove data files
+dataFilesToRemove <- dir(pattern = paste0(projectid, "_"))
+file.remove(dataFilesToRemove)
+
+# EML to S3
+if(length(list.files(pattern = "*.xml")) == 1) {
+  emlToAmz(list.files(pattern = "*.xml")) } else {
+    print("more than one xml file found")
+  }
+
+# EML to cap-data/cap-data-eml and remove file from project
+if(length(list.files(pattern = "*.xml")) == 1) {
+  file.copy(list.files(pattern = "*.xml"), "/home/srearl/localRepos/cap-data/cap-data-eml")
+  file.remove(list.files(pattern = "*.xml")) } else {
+    print("more than one xml file found")
+  }
+```
