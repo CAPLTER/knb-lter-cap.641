@@ -1,36 +1,36 @@
 attributeName,code,definition
-reach,Ave35,metadata_not_provided
-reach,Ave67,metadata_not_provided
-reach,BM,metadata_not_provided
-reach,Price,metadata_not_provided
-reach,Priest,metadata_not_provided
-reach,Rio,metadata_not_provided
-reach,Tonto,metadata_not_provided
-wind,gusts,metadata_not_provided
-wind,light,metadata_not_provided
-wind,none,metadata_not_provided
-precipitation,light_rain,metadata_not_provided
-precipitation,none,metadata_not_provided
-disturbances,0,metadata_not_provided
-disturbances,1,metadata_not_provided
-noise_level,high,metadata_not_provided
-noise_level,low,metadata_not_provided
-noise_level,none,metadata_not_provided
-distance,0-5,metadata_not_provided
-distance,10-20,metadata_not_provided
-distance,20-40,metadata_not_provided
-distance,>40,metadata_not_provided
-distance,5-10,metadata_not_provided
-distance,FT,metadata_not_provided
-seen,0,metadata_not_provided
-seen,1,metadata_not_provided
-heard,0,metadata_not_provided
-heard,1,metadata_not_provided
-direction,E,metadata_not_provided
-direction,N,metadata_not_provided
-direction,NE,metadata_not_provided
-direction,NW,metadata_not_provided
-direction,S,metadata_not_provided
-direction,SE,metadata_not_provided
-direction,SW,metadata_not_provided
-direction,W,metadata_not_provided
+reach,Ave35,Salt River at 35th Ave north of Broadway Road
+reach,Ave67,Salt River at 67th Ave north of Southern Avenue
+reach,BM,Baseline and Meridian Wildlife Area; Salt River at 115th Ave northeast of Phoenix International Raceway
+reach,Price,"Salt River, by Price Drain, northeast of the loop 101 and loop 202 intersection"
+reach,Priest,"Salt River flood channel, east of Priest Drive and west of Tempe Town Lake dam"
+reach,Rio,"Salt River at Rio Salado; Central Ave, north of Broadway Road"
+reach,Tonto,"Salt River, Tonto National Forest, near Usery Road"
+wind,gusts,wind gusts
+wind,light,light wind
+wind,none,no perceptible wind
+precipitation,light_rain,light rain
+precipitation,none,no precipitation
+disturbances,0,no perceptible disturbance to observer or in the vicinity during the survey
+disturbances,1,disturbance occurred during the survey
+noise_level,high,high level of noise during the survey
+noise_level,low,low level noise during the survey
+noise_level,none,no noise during the survey
+distance,0-5,bird observed within zero to five meters of observer
+distance,10-20,bird observed ten to twenty meters from observer
+distance,20-40,bird observed twenty to forty meters from observer
+distance,>40,bird observed forty or more meters from observer
+distance,5-10,bird observed five to ten meters from observer
+distance,FT,"bird is seen flying through the count area below the tallest structure or vegetation, and not observed taking off or landing"
+seen,0,bird not identified by sight
+seen,1,bird identified by sight
+heard,0,bird not identified by sound
+heard,1,bird identified by sound
+direction,E,east
+direction,N,north
+direction,NE,north east
+direction,NW,north west
+direction,S,south
+direction,SE,south east
+direction,SW,south west
+direction,W,west

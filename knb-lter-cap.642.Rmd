@@ -32,7 +32,7 @@ library(capeml)
 ```{r dataset_details}
 projectid <- 641
 packageIdent <- 'knb-lter-cap.641.2'
-pubDate <- '2018-03-20'
+pubDate <- '2018-03-19'
 ```
  
 ```{r helper_functions}
@@ -142,11 +142,12 @@ srbp_birds <- srbp_birds %>%
   mutate(direction = as.factor(direction)) %>% 
   select(site_code, reach, survey_date:time_end, observer_initials, survey_notes:QCcomment)
 
+# attributes and factors files already created and populated - do not recreated
+# unless needed
 # writeAttributes(srbp_birds) # write data frame attributes to a csv in current dir to edit metadata
+# data_element_factors <- factorsToFrame(srbp_birds)
 
 srbp_birds_desc <- "bird survey sampling details (site, reach, date, time, observer, site conditions, and notes) and birds surveyed (type, number, distance from observer, behavior)"
-
-data_element_factors <- factorsToFrame(srbp_birds)
 
 # create data table based on metadata provided in the companion csv
 # use createdataTableFn() if attributes and classes are to be passed directly
@@ -187,11 +188,12 @@ srbp_reach_characteristics <- inner_join(srbp_reach_characteristics, herps_reach
   mutate(restored = as.factor(restored)) %>% 
   mutate(water = as.factor(water)) 
 
+# attributes and factors files already created and populated - do not recreated
+# unless needed
 # writeAttributes(srbp_reach_characteristics) # write data frame attributes to a csv in current dir to edit metadata
+# srbp_reach_characteristics_factors <- factorsToFrame(srbp_reach_characteristics)
 
 srbp_reach_characteristics_desc <- "Salt River reach location of each sampling site, and general characteristics of that portion of the river where sampling is conducted"
-
-srbp_reach_characteristics_factors <- factorsToFrame(srbp_reach_characteristics)
 
 # create data table based on metadata provided in the companion csv
 # use createdataTableFn() if attributes and classes are to be passed directly
@@ -228,6 +230,12 @@ srbp_reach_characteristics_DT <- createDTFF(dfname = srbp_reach_characteristics,
 
 # see core birds for the query if you want only the current sites
 
+# using the Rmd template, this will run but the existing
+# srbp_bird_locations.kml will be used. to create a new, updated spatial data
+# file to publish, you will need to delete the existing kml file from the repo
+# and redo all steps, including those listed for QGIS (or rewrite to R would be
+# even better)
+
 srbp_bird_locations <- dbGetQuery(prod, "
 SELECT 
   s.site_code,
@@ -242,18 +250,20 @@ ORDER BY site_code;") %>%
   select(reach, lat, long)
 
 # convert tabular data to kml
-library("sp")
-library("rgdal")
+library(sp)
+library(rgdal)
+
 coordinates(srbp_bird_locations) <- c("long", "lat")
 proj4string(srbp_bird_locations) <- CRS("+init=epsg:4326")
 # srbp_bird_locations <- spTransform(srbp_bird_locations, CRS("+proj=longlat +datum=WGS84")) 
 # spTransform not required here as already in WGS 84
-writeOGR(srbp_bird_locations, "srbp_bird_locations.kml", layer = "srbp_bird_locations", driver = "KML")
+if(!file.exists('srbp_bird_locations.kml')){
+  writeOGR(srbp_bird_locations, "srbp_bird_locations.kml", layer = "srbp_bird_locations", driver = "KML") } else {
+    "file already exists"
+  }
 
-# in QGIS
+# use QGIS to convert point data to polygons:
 # add the kml file > convex hull (field = reach) > convert to kml (be sure to name fields)
-
-# 2018-03-16: can't we just make it a kml in R, write it, and load it, instead of writing to shapefile, then converting to kml in qgis?
 
 kml_desc <- "bird survey locations at select locations along the Salt River in the greater Phoenix metropolitan area; polygons reflect the combined area of all bird survey locations (current and historic) at each river reach"
 srbp_bird_locations <- createKML(kmlobject = 'srbp_bird_locations.kml',
@@ -277,7 +287,7 @@ abstract <- as(set_TextType("abstract.md"), "abstract")
 # creators
 heatherBateman <- addCreator('h', 'bateman')
 danChilders <- addCreator('d', 'childers')
-paigeWarren <- addCreator('p', 'warren')
+paigeWarren <- addCreator('paig', 'warren')
 
 creators <- c(as(heatherBateman, 'creator'),
               as(danChilders, 'creator'),
@@ -300,37 +310,25 @@ metadataProvider <-c(as(stevanEarl, 'metadataProvider'),
 keywordSet <-
   c(new("keywordSet",
         keywordThesaurus = "LTER controlled vocabulary",
-        keyword =  c("nutrients",
-                     "dissolved organic carbon",
-                     "dissolved organic nitrogen",
-                     "dissolved inorganic nitrogen",
+        keyword =  c("urban",
+                     "birds",
+                     "restoration",
                      "rivers",
-                     "discharge",
-                     "water chemistry",
-                     "particulates",
-                     "nitrate",
-                     "nitrite",
-                     "ammonium",
-                     "anions",
-                     "cations",
-                     "chloride",
-                     "phosphorus",
-                     "nitrogen",
-                     "specific conductivity",
-                     "urban",
-                     "runoff",
-                     "watersheds",
-                     "total dissolved nitrogen")),
+                     "riparian",
+                     "species abundance",
+                     "species composition",
+                     "communities",
+                     "community composition")),
     new("keywordSet",
-        keywordThesaurus = "LTER core areas",
-        keyword =  c("water and fluxes",
-                     "parks and rivers",
-                     "movement of organic matter",
-                     "movement of inorganic matter")),
+        keywordThesaurus = "LTER core areas and CAP LTER IRTs",
+        keyword =  c("disturbance patterns",
+                     "population studies",
+                     "adapting to city life")),
     new("keywordSet",
         keywordThesaurus = "Creator Defined Keyword Set",
-        keyword =  c("stormwater",
-                     "catchment")),
+        keyword =  c("aves",
+                     "avifauna",
+                     "salt river")),
     new("keywordSet",
         keywordThesaurus = "CAPLTER Keyword Set List",
         keyword =  c("cap lter",
@@ -339,7 +337,6 @@ keywordSet <-
                      "central arizona phoenix long term ecological research",
                      "arizona",
                      "az",
-                     "indian bend wash",
                      "salt river",
                      "arid land"))
   )
@@ -348,20 +345,28 @@ keywordSet <-
 
 ```{r methods}
 
-methods <- set_methods("methods.md")
+methods <- set_methods("lterBirds_46_methods.md")
 ```
 
 ```{r coverages}
 
-begindate <- format(min(runoff_chemistry$runoff_datetime), "%Y-%m-%d")
-enddate <- format(max(runoff_chemistry$runoff_datetime), "%Y-%m-%d")
+begindate <- as.character(min(srbp_birds$survey_date))
+enddate <- as.character(max(srbp_birds$survey_date))
 geographicDescription <- "CAP LTER study area"
 coverage <- set_coverage(begin = begindate,
                          end = enddate,
                          geographicDescription = geographicDescription,
-                         west = -112.082, east = -111.865,
-                         north = +33.6149, south = +33.3745)
+                         west = -112.305, east = -111.609,
+                         north = +33.56, south = +33.3825)
 ```
+
+```{r set_taxonomic_coverage}
+
+# this workflow in the srbp_taxonomic_coverage.R file owing to its length & complexity
+source('srbp_taxonomic_coverage.R')
+
+```
+
 
 ```{r construct_dataset}
 
@@ -393,14 +398,7 @@ dataset <- new("dataset",
                methods = methods,
                distribution = metadata_dist,
                dataTable = listOfDataTables,
-               otherEntity = c(stormwater_catchments)) # if other entity is relevant
-
-               # dataTable = c(first_DT,
-               #               second_DT))
-
-```
-
-```{r custom_units, eval=FALSE}
+               otherEntity = c(srbp_bird_locations)) # if other entity is relevant
 
 ```
 
