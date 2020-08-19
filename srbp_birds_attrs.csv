@@ -10,14 +10,14 @@ human_activity_notes,,,,notes regarding any human activity during the survey,not
 wind,,,,,qualitative assessment of wind speed during the survey,factor,,
 precipitation,,,,,qualitative assessment of precipitation during the survey,factor,,
 disturbances,,,,,indication of a disturbance to the surveyor at the survey location during the survey,factor,,
-sight_obstruct,,dimensionless,real,,percent of the view obstructed,numeric,,
+sight_obstruct,,dimensionless,real,,percent of the view obstructed,numeric,0,100
 noise_level,,,,,qualitative assessment of noise level during the survey,factor,,
 site_condition,,,,notes regarding the condition of the survey location,notes regarding the condition of the survey location,character,,
 non_bird_species,,,,notes regarding non-bird fauna observed during the survey,notes regarding non-bird fauna observed during the survey,character,,
 code,,,,four-letter alpha code of observed taxon,four-letter alpha code of observed taxon,character,,
 common_name,,,,common name of observed taxon,common name of observed taxon,character,,
 distance,,,,,relative distance or position of observed bird(s) relative to the observer,factor,,
-bird_count,,number,real,,quantity of the observed taxon,numeric,,
+bird_count,,number,real,,quantity of the observed taxon,numeric,1,700
 observation_notes,,,,notes regarding bird observation,notes regarding bird observation,character,,
 seen,,,,,indication of whether the bird was seen,factor,,
 heard,,,,,indication of whether the bird was heard,factor,,

@@ -1,0 +1,4 @@
+"attributeName","formatString","unit","numberType","definition","attributeDefinition","columnClasses","minimum","maximum"
+"Name","","","",sampling location along the Salt River,sampling location along the Salt River,"character","",""
+"lat","",degree,"real","",latitude,"numeric","33.382491","33.560019"
+"long","",degree,"real","",longitude,"numeric","-112.304944","-111.608826"

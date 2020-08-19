@@ -1,0 +1,6 @@
+attributeName,formatString,unit,numberType,definition,attributeDefinition,columnClasses,minimum,maximum
+site_code,,,,survey location identifier,survey location identifier,character,,
+reach,,,,,sampling location along the Salt River,factor,,
+urbanized,,,,,boolean indicator denoting if the location is in an urban or non-urban setting,factor,,
+restored,,,,,"boolean indicator denoting if the site was the focus of active restoration through plantings or seeding, or has not received treatment",factor,,
+water,,,,,boolean indicator denoting if the presence of water is perennial or ephemeral,factor,,

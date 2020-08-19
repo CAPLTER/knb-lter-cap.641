@@ -1,7 +1,5 @@
 ---
 title: "knb-lter-cap.641"
-author: "SRE"
-date: "March 16, 2018"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -14,75 +12,34 @@ single birder (formerly Melanie), birded at all six points four times per
 year. The other two birders, birded at a single core site during the two
 regular birding seasons.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ```{r libraries}
 library(EML)
-library(RPostgreSQL)
-library(RMySQL)
 library(tidyverse)
 library(tools)
-library(readxl)
 library(aws.s3)
 library(capeml)
 ```
 
-```{r dataset_details}
-projectid <- 641
-packageIdent <- 'knb-lter-cap.641.2'
-pubDate <- '2018-03-19'
-```
- 
-```{r helper_functions}
-source('~/localRepos/reml-helper-tools/writeAttributesFn.R')
-source('~/localRepos/reml-helper-tools/createDataTableFromFileFn.R')
-source('~/localRepos/reml-helper-tools/createKMLFn.R')
-source('~/localRepos/reml-helper-tools/address_publisher_contact_language_rights.R')
-source('~/localRepos/reml-helper-tools/createOtherEntityFn.R')
-source('~/localRepos/reml-helper-tools/createPeople.R')
-source('~/localRepos/reml-helper-tools/createFactorsDataframe.R')
-source('~/localRepos/reml-helper-tools/amazon_file_upload.R')
-```
+_2016-12-02_ The meaning of 'flying' in the birds table is unclear. There are
+1962 records where flying = 1. All of these except for two records have
+distance = FT. However, not all records where distance = FT have a distance = 1
+(any any value for that matter). Adding confusion, in her metadata, Corinna has
+listed that flying = NULL is true, but then what would be the meaning of flying
+= 0, and that would mean that most birds were flying. I am not certain, but my
+impression is that flying was a precursor to FT. A "flying" option is not on
+the current datasheet, nor on an earlier one revised in 2004. I am going to
+omit flying from the publication of these data as I think it is more confusing
+than helpful (and I cannot explain its meaning).
 
-```{r connections::amazon}
-source('~/Documents/localSettings/aws.s3')
-```
-
-```{r connections::postgres::local, eval=F }
-source('~/Documents/localSettings/pg_local.R')
-pg <- pg_local
-```
-
-```{r connections::postgres::prod, eval=T }
-source('~/Documents/localSettings/pg_prod.R')
-pg <- pg_prod
-```
-
-```{r connections::mysql::prod, eval=T }
-source('~/Documents/localSettings/mysql_rds_prod.R')
-prod <- mysql_prod
-```
+# srbp_birds
 
 ```{r srbp_birds}
-
-# 2016-12-02. The meaning of 'flying' in the birds table is unclear. There are
-# 1962 records where flying = 1. All of these except for two records have
-# distance = FT. However, not all records where distance = FT have a distance =
-# 1 (any any value for that matter). Adding confusion, in her metadata, Corinna
-# has listed that flying = NULL is true, but then what would be the meaning of
-# flying = 0, and that would mean that most birds were flying. I am not certain,
-# but my impression is that flying was a precursor to FT. A "flying" option is
-# not on the current datasheet, nor on an earlier one revised in 2004. I am
-# going to omit flying from the publication of these data as I think it is more
-# confusing than helpful (and I cannot explain its meaning).
 
 # note that this select statement does not include wind speed, wind dir, air
 # temp, or cloud cover as those variables have not been collected for a long
 # time and are not relevant to the more recent SRBP observations
 
-srbp_birds <- dbGetQuery(prod, "
+srbp_birds <- dbGetQuery(mysql_prod, "
 SELECT
   sites.site_code,
   surveys.survey_date,
@@ -111,143 +68,172 @@ FROM lter34birds.surveys
 JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
 JOIN lter34birds.birds ON (surveys.survey_id = birds.survey_id)
 JOIN lter34birds.bird_taxons ON (birds.bird_taxon_id = bird_taxons.id)
-WHERE 
+WHERE
   sites.sample LIKE 'SRBP'
-ORDER BY survey_date
-LIMIT 500000;")
+ORDER BY survey_date;")
 
-srbp_birds[srbp_birds == ''] <- NA # lots of missing values, convert to NA
+# temp for v4
+srbp_birds <- srbp_birds %>%
+  filter(survey_date <= "2019-05-15")
 
-# pulling this code out separately owing to its verbosity for a singular 
+srbp_birds[srbp_birds == ""] <- NA # lots of missing values, convert to NA
+
+# pulling this code out separately owing to its verbosity for a singular
 # purpose: getting the intials of the observers and presenting those instead of
 # the full name
-srbp_birds <- srbp_birds %>% 
-  mutate(observer = toupper(observer)) %>% 
-  separate(observer, c("name1", "name2"), " ", remove = T) %>% 
-  mutate(init1 = str_extract(name1, "\\b\\w")) %>% 
-  mutate(init2 = str_extract(name2, "\\b\\w")) %>% 
-  unite(observer_initials, init1, init2, sep = "", remove = T) 
 
-srbp_birds <- srbp_birds %>% 
-  mutate(reach = str_extract(site_code, "^[^_]+")) %>% 
-  mutate(reach = as.factor(reach)) %>% 
-  mutate(survey_date = as.Date(survey_date)) %>% 
-  mutate(wind = as.factor(wind)) %>% 
-  mutate(precipitation = as.factor(precipitation)) %>% 
-  mutate(disturbances = as.factor(disturbances)) %>% 
-  mutate(noise_level = as.factor(noise_level)) %>% 
-  mutate(distance = as.factor(distance)) %>% 
-  mutate(seen = as.factor(seen)) %>% 
-  mutate(heard = as.factor(heard)) %>% 
-  mutate(direction = as.factor(direction)) %>% 
-  select(site_code, reach, survey_date:time_end, observer_initials, survey_notes:QCcomment)
+srbp_birds <- srbp_birds %>%
+  mutate(observer = toupper(observer)) %>%
+  separate(observer, c("name1", "name2"), " ", remove = T) %>%
+  mutate(
+    init1 = str_extract(name1, "\\b\\w"),
+    init2 = str_extract(name2, "\\b\\w")
+    ) %>%
+  unite(observer_initials, init1, init2, sep = "", remove = T)
 
-# attributes and factors files already created and populated - do not recreated
-# unless needed
-# writeAttributes(srbp_birds) # write data frame attributes to a csv in current dir to edit metadata
-# data_element_factors <- factorsToFrame(srbp_birds)
+srbp_birds <- srbp_birds %>%
+  mutate(
+    reach = str_extract(site_code, "^[^_]+"),
+    reach = as.factor(reach),
+    survey_date = as.Date(survey_date),
+    wind = as.factor(wind),
+    precipitation = as.factor(precipitation),
+    disturbances = as.factor(disturbances),
+    noise_level = as.factor(noise_level),
+    distance = as.factor(distance),
+    seen = as.factor(seen),
+    heard = as.factor(heard),
+    direction = as.factor(direction)
+    ) %>%
+select(
+  site_code,
+  reach,
+  survey_date:time_end,
+  observer_initials,
+  survey_notes:QCcomment
+)
+
+write_attributes(srbp_birds)
+# write_factors(srbp_birds)
 
 srbp_birds_desc <- "bird survey sampling details (site, reach, date, time, observer, site conditions, and notes) and birds surveyed (type, number, distance from observer, behavior)"
 
-# create data table based on metadata provided in the companion csv
-# use createdataTableFn() if attributes and classes are to be passed directly
-srbp_birds_DT <- createDTFF(dfname = srbp_birds,
-                            # factors = data_element_factors,
-                            description = srbp_birds_desc,
-                            dateRangeField = 'survey_date')
+srbp_birds_DT <- create_dataTable(
+  dfname = srbp_birds,
+  description = srbp_birds_desc,
+  dateRangeField = "survey_date"
+)
 
 ```
+
+There is not enough detail concerning the SRBP sites in the lter34.sites table
+to warrant pulling that information. However, SRBP reach characteristics are
+relevant so we will publish those details
+
+# reach_characteristics
 
 ```{r reach_characteristics}
 
-# not enough detail concerning the SRBP sites in the lter34.sites table to 
-# warrant pulling that information. However, SRBP reach characteristics are
-# relevant so we will publish those details
-
-srbp_reach_characteristics <- dbGetQuery(prod, "
-SELECT 
+srbp_reach_characteristics <- dbGetQuery(mysql_prod, "
+SELECT
   s.site_code
 FROM lter34birds.sites s
-WHERE 
+WHERE
   s.sample LIKE 'SRBP'
-ORDER BY site_code;") %>% 
-  mutate(reach = str_extract(site_code, "^[^_]+")) %>% 
+ORDER BY site_code;") %>%
+  mutate(reach = str_extract(site_code, "^[^_]+")) %>%
   select(site_code, reach)
 
-herps_reach_chars <- dbGetQuery(pg,"
-SELECT 
+herps_reach_chars <- dbGetQuery(pg_prod, "
+SELECT
   reach,
-  urbanized, 
-  restored, 
+  urbanized,
+  restored,
   water
 FROM herpetofauna.river_reaches;")
 
-srbp_reach_characteristics <- inner_join(srbp_reach_characteristics, herps_reach_chars, by = c("reach")) %>% 
-  mutate(reach = as.factor(reach)) %>% 
-  mutate(urbanized = as.factor(urbanized)) %>% 
-  mutate(restored = as.factor(restored)) %>% 
-  mutate(water = as.factor(water)) 
-
-# attributes and factors files already created and populated - do not recreated
-# unless needed
-# writeAttributes(srbp_reach_characteristics) # write data frame attributes to a csv in current dir to edit metadata
-# srbp_reach_characteristics_factors <- factorsToFrame(srbp_reach_characteristics)
+srbp_reach_characteristics <- inner_join(srbp_reach_characteristics, herps_reach_chars, by = c("reach")) %>%
+  mutate(
+    reach = as.factor(reach),
+    urbanized = as.factor(urbanized),
+    restored = as.factor(restored),
+    water = as.factor(water)
+  )
 
 srbp_reach_characteristics_desc <- "Salt River reach location of each sampling site, and general characteristics of that portion of the river where sampling is conducted"
 
-# create data table based on metadata provided in the companion csv
-# use createdataTableFn() if attributes and classes are to be passed directly
-srbp_reach_characteristics_DT <- createDTFF(dfname = srbp_reach_characteristics,
-                                            # factors = srbp_reach_characteristics_factors,
-                                            description = srbp_reach_characteristics_desc)
-                                            # dateRangeField = 'runoff_datetime')
+write_attributes(srbp_reach_characteristics)
+# write_factors(srbp_reach_characteristics)
+
+srbp_reach_characteristics_DT <- create_dataTable(
+  dfname = srbp_reach_characteristics,
+  description = srbp_reach_characteristics_desc
+)
 
 ```
 
+Get the bird survey locations. Here we are extracting these data from the
+database as opposed to using an existing shapefile as I am presenting only the
+most up-to-date location information (as opposed to the locations and their
+changes through time). Double-check the query, it worked with the small number
+of SRBP sites with updated locations at the time these were pulled but not sure
+its accuracy when the data are more complicated (e.g., a given location having
+moved multiple times) and note that I am using only year to reflect the most
+recent location, if a site moved twice in a year, month would have to be
+considered as well. Also note that I had to include blh.end_date_year in the
+query to be able to include it in the HAVING clause.
+
+As with the herp plots, I am struggling as to whether it is appropriate to even
+make the exact points public information from a disturbance standpoint, but
+also a too-much-knowledge about the organisms standpoint. Finally, now that we
+are tracking the movement of plots through time, that would have to be
+encapsulated in this publication so as not to confuse a researcher thinking
+that all data necessarily come from the same location. Taken together, I think
+the better approach is to make a polygon that encapsulates all points (curent
+and historical) at each reach. This provides a user with a reasonable
+understanding of the location, but obscures (slightly, anyway) the exact
+position details.
+
+see core birds for the query if you want only the current sites
+
 ```{r spatial_data}
 
-# Get the bird survey locations. Here we are extracting these data from the 
-# database as opposed to using an existing shapefile as I am presenting only the
-# most up-to-date location information (as opposed to the locations and their 
-# changes through time). Double-check the query, it worked with the small number
-# of SRBP sites with updated locations at the time these were pulled but not sure
-# its accuracy when the data are more complicated (e.g., a given location having
-# moved multiple times) and note that I am using only year to reflect the most 
-# recent location, if a site moved twice in a year, month would have to be 
-# considered as well. Also note that I had to include blh.end_date_year in the
-# query to be able to include it in the HAVING clause.
-
-# as with the herp plots, I am struggling as to whether it is appropriate to
-# even make the exact points public information from a disturbance standpoint,
-# but also a too-much-knowledge about the organisms standpoint. Finally, now
-# that we are tracking the movement of plots through time, that would have to be
-# encapsulated in this publication so as not to confuse a researcher thinking
-# that all data necessarily come from the same location. Taken together, I think
-# the better approach is to make a polygon that encapsulates all points (curent
-# and historical) at each reach. This provides a user with a reasonable 
-# understanding of the location, but obscures (slightly, anyway) the exact 
-# position details.
-
-# see core birds for the query if you want only the current sites
-
-# using the Rmd template, this will run but the existing
-# srbp_bird_locations.kml will be used. to create a new, updated spatial data
-# file to publish, you will need to delete the existing kml file from the repo
-# and redo all steps, including those listed for QGIS (or rewrite to R would be
-# even better)
-
-srbp_bird_locations <- dbGetQuery(prod, "
-SELECT 
+srbp_bird_locations <- dbGetQuery(mysql_prod, "
+  SELECT
   s.site_code,
   blh.lat,
   blh.`long`
-FROM lter34birds.birds_location_histories blh
-JOIN lter34birds.sites s ON (s.site_id = blh.site_id)
-WHERE 
+  FROM lter34birds.birds_location_histories blh
+  JOIN lter34birds.sites s ON (s.site_id = blh.site_id)
+  WHERE
   s.sample LIKE 'SRBP'
-ORDER BY site_code;") %>% 
-  mutate(reach = str_extract(site_code, "^[^_]+")) %>% 
-  select(reach, lat, long)
+  ORDER BY site_code;") %>%
+  mutate(reach = str_extract(site_code, "^[^_]+")) %>%
+  dplyr::select(
+    Name = reach,
+    lat,
+    long
+  )
+
+  srbp_bird_locations <- st_as_sf(
+    x = srbp_bird_locations,
+    coords = c("long", "lat"),
+    crs = 4326
+    ) %>%
+  group_by(Name) %>%
+  summarise() %>%
+  st_convex_hull()
+
+write_attributes(srbp_bird_locations)
+
+srbp_bird_locations_desc <- "bird survey locations at select locations along the Salt River in the greater Phoenix metropolitan area; polygons reflect the combined area of all bird survey locations (current and historic) at each river reach"
+
+srbp_bird_locations_SV <- create_spatialVector(
+  svname = srbp_bird_locations,
+  description = srbp_bird_locations_desc
+)
+
+---
 
 # convert tabular data to kml
 library(sp)
@@ -271,81 +257,42 @@ srbp_bird_locations <- createKML(kmlobject = 'srbp_bird_locations.kml',
 
 ```
 
-```{r title}
-title <- 'Point-count bird censusing: long-term monitoring of bird abundance and diversity along the Salt River in the greater Phoenix metropolitan area, ongoing since 2013'
-```
-
-```{r abstract}
-
-# abstract from file or directly as text
-abstract <- as(set_TextType("abstract.md"), "abstract") 
-# abstract <- 'abstract text'
-```
-
 ```{r people}
 
 # creators
-heatherBateman <- addCreator('h', 'bateman')
-danChilders <- addCreator('d', 'childers')
-paigeWarren <- addCreator('paig', 'warren')
 
-creators <- c(as(heatherBateman, 'creator'),
-              as(danChilders, 'creator'),
-              as(paigeWarren, 'creator'))
+# heather <- addCreator('h', 'bateman')
+# paige <- addCreator('paig', 'warren')
+# danChilders <- addCreator('d', 'childers')
+
+heather <- create_role(
+  firstName = "heather",
+  lastName = "bateman",
+  roleType = "creator"
+)
+paige <- create_role(
+  firstName = "paige",
+  lastName = "warren",
+  roleType = "creator"
+)
+
+creators <- list(heather, paige)
 
 # metadata providers
-stevanEarl <- addMetadataProvider('s', 'earl')
-sallyWittlinger <- addMetadataProvider('s', 'wittlinger')
 
-metadataProvider <-c(as(stevanEarl, 'metadataProvider'),
-                     as(sallyWittlinger, 'metadataProvider'))
+stevan <- create_role(
+  firstName = "stevan",
+  lastName = "earl",
+  roleType = "meta"
+)
+sally <- create_role(
+  firstName = "sally",
+  lastName = "wittlinger",
+  roleType = "meta"
+)
 
-```
+metadataProvider <- list(sally, stevan)
 
-```{r keywords}
-
-# CAP IRTs for reference: https://sustainability.asu.edu/caplter/research/
-# be sure to include these as appropriate
-
-keywordSet <-
-  c(new("keywordSet",
-        keywordThesaurus = "LTER controlled vocabulary",
-        keyword =  c("urban",
-                     "birds",
-                     "restoration",
-                     "rivers",
-                     "riparian",
-                     "species abundance",
-                     "species composition",
-                     "communities",
-                     "community composition")),
-    new("keywordSet",
-        keywordThesaurus = "LTER core areas and CAP LTER IRTs",
-        keyword =  c("disturbance patterns",
-                     "population studies",
-                     "adapting to city life")),
-    new("keywordSet",
-        keywordThesaurus = "Creator Defined Keyword Set",
-        keyword =  c("aves",
-                     "avifauna",
-                     "salt river")),
-    new("keywordSet",
-        keywordThesaurus = "CAPLTER Keyword Set List",
-        keyword =  c("cap lter",
-                     "cap",
-                     "caplter",
-                     "central arizona phoenix long term ecological research",
-                     "arizona",
-                     "az",
-                     "salt river",
-                     "arid land"))
-  )
-
-```
-
-```{r methods}
-
-methods <- set_methods("lterBirds_46_methods.md")
 ```
 
 ```{r coverages}
@@ -353,83 +300,158 @@ methods <- set_methods("lterBirds_46_methods.md")
 begindate <- as.character(min(srbp_birds$survey_date))
 enddate <- as.character(max(srbp_birds$survey_date))
 geographicDescription <- "CAP LTER study area"
-coverage <- set_coverage(begin = begindate,
-                         end = enddate,
-                         geographicDescription = geographicDescription,
-                         west = -112.305, east = -111.609,
-                         north = +33.56, south = +33.3825)
-```
-
-```{r set_taxonomic_coverage}
-
-# this workflow in the srbp_taxonomic_coverage.R file owing to its length & complexity
-source('srbp_taxonomic_coverage.R')
+coverage <- set_coverage(
+  begin = begindate,
+  end = enddate,
+  geographicDescription = geographicDescription,
+  west = -112.305, east = -111.609,
+  north = +33.56, south = +33.3825
+)
 
 ```
 
+## taxonomic coverage
 
-```{r construct_dataset}
+Taxonomic coverage(s) are constructed using EDI's taxonomyCleanr tool suite.
 
-# from sourced file:
-  # address
-  # publisher
-  # contact
-  # rights
-  # distribution
+*Note* that the `taxa_map.csv` built with the `create_taxa_map()` function and
+resolving taxonomic IDs (i.e., `resolve_comm_taxa()`) only needs to be run once,
+a potentially long process, per version/session -- the taxonomicCoverage can be
+built as many times as needed with `resolve_comm_taxa()` once the `taxa_map.csv`
+has been generated and the taxonomic IDs resolved.
 
-# generate a list of EML dataTables
-listOfDataTables <- lapply(ls(pattern = "_DT"), function(DT) { get(DT) } )
+```{r taxonomyCleanr, eval=FALSE}
 
-# print list as a safety step
-print(ls(pattern= "_DT"))
+library(taxonomyCleanr)
 
-# DATASET
-dataset <- new("dataset",
-               title = title,
-               creator = creators,
-               pubDate = pubDate,
-               metadataProvider = metadataProvider,
-               # associatedParty = associatedParty,
-               intellectualRights = rights,
-               abstract = abstract,
-               keywordSet = keywordSet,
-               coverage = coverage,
-               contact = contact,
-               methods = methods,
-               distribution = metadata_dist,
-               dataTable = listOfDataTables,
-               otherEntity = c(srbp_bird_locations)) # if other entity is relevant
+my_path <- getwd() # taxonomyCleanr requires a path (to build the taxa_map)
 
+# Example: draw taxonomic information from existing resource:
+
+# plant taxa listed in the om_transpiration_factors file
+plantTaxa <- read_csv('om_transpiration_factors.csv') %>%
+  filter(attributeName == "species") %>% 
+  as.data.frame()
+
+# create or update map. A taxa_map.csv is the heart of taxonomyCleanr. This
+# function will build the taxa_map.csv and put it in the path identified with
+# my_path.
+create_taxa_map(path = my_path, x = plantTaxa, col = "definition")
+
+# Example: construct taxonomic resource:
+
+gambelQuail <- tibble(taxName = "Callipepla gambelii")
+
+# Create or update map: a taxa_map.csv is the heart of taxonomyCleanr. This
+# function will build the taxa_map.csv in the path identified with my_path.
+create_taxa_map(path = my_path, x = gambelQuail, col = "taxName")
+
+# Resolve taxa by attempting to match the taxon name (data.source 3 is ITIS but
+# other sources are accessible). Use `resolve_comm_taxa` instead of
+# `resolve_sci_taxa` if taxa names are common names but note that ITIS
+# (data.source 3) is the only authority taxonomyCleanr will allow for common
+# names.
+resolve_sci_taxa(path = my_path, data.sources = 3) # in this case, 3 is ITIS
+
+# build the EML taxonomomic coverage
+taxaCoverage <- make_taxonomicCoverage(path = my_path)
+
+# add taxonomic to the other coverages
+coverage$taxonomicCoverage <- taxaCoverage
 ```
 
-```{r construct_eml}
+# dataset
 
-if(exists('unitList')) {
-  eml <- new("eml",
-             schemaLocation = "eml://ecoinformatics.org/eml-2.1.1  http://nis.lternet.edu/schemas/EML/eml-2.1.1/eml.xsd",
-             packageId = packageIdent,
-             scope = "system",
-             system = "knb",
-             access = lter_access,
-             dataset = dataset,
-             additionalMetadata = as(unitList, "additionalMetadata"))
-} else {
-  eml <- new("eml",
-             schemaLocation = "eml://ecoinformatics.org/eml-2.1.1  http://nis.lternet.edu/schemas/EML/eml-2.1.1/eml.xsd",
-             packageId = packageIdent,
-             scope = "system",
-             system = "knb",
-             access = lter_access,
-             dataset = dataset)
+Optionally, provide: scope, abstract, methods, keywords, publication date.
+Projects scopes include lter (default), urex, ltreb, and som.
+
+```{r construct-dataset}
+
+dataset <- create_dataset()
+```
+
+# add dataTable
+
+```{r dataSet$dataTable}
+
+# add dataTables if relevant
+
+print(ls(pattern = "_DT"))
+
+if (length(ls(pattern = "_DT")) > 0) {
+
+  listOfDataTables <- lapply(ls(pattern = "_DT"), function(DT) { get(DT) } )
+
+  dataset$dataTable  <- listOfDataTables
+
 }
 
+# or add manually
+# dataset$dataTable <- list(dataTableOne, dataTableTwo)
+
 ```
 
-```{r write_eml}
+# add otherEntity
+
+```{r dataSet$otherEntity}
+
+# add other entities if relevant
+
+print(ls(pattern = "_OE"))
+
+if (length(ls(pattern = "_OE")) > 0) {
+
+  listOfOtherEntities <- lapply(ls(pattern = "_OE"), function(OE) { get(OE) } )
+
+  dataset$otherEntity <- listOfOtherEntities
+
+}
+
+# or add manually
+# dataset$otherEntity <- list(otherEntityOne, otherEntityTwo)
+
+```
+
+# add spatialVector
+
+```{r dataSet$spatialVector}
+
+# add spatial vectors if relevant
+
+print(ls(pattern = "_SV"))
+
+if (length(ls(pattern = "_SV")) > 0) {
+
+  listOfSpatialVectors <- lapply(ls(pattern = "_SV"), function(SV) { get(SV) } )
+
+  dataset$spatialVector  <- listOfSpatialVectors
+
+}
+
+# or add manually
+# dataset$spatialVector <- list(spatialVectorOne, spatialVectorTwo)
+
+```
+
+# eml
+
+```{r construct_eml, eval=TRUE}
+
+eml <- create_eml()
+```
+
+```{r validate_eml, eval=TRUE}
+
+eml_validate(eml)
+```
+
+```{r eml_to_file, eval=TRUE}
 
 # write the eml to file
-write_eml(eml, paste0(packageIdent, ".xml"))
+write_cap_eml()
 ```
+
+# file placement
 
 ```{r preview_data_file_to_upload}
 
