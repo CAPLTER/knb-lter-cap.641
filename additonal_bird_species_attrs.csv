@@ -1,0 +1,9 @@
+"attributeName","formatString","unit","numberType","definition","attributeDefinition","columnClasses","minimum","maximum"
+site_code,,,,survey location identifier,survey location identifier,character,,
+reach,,,,,sampling location along the Salt River,factor,,
+survey_date,YYYY-MM-DD,,,,survey date,Date,,
+time_start,hh:mm:ss,,,,survey start time,Date,,
+time_end,hh:mm:ss,,,,survey end time,Date,,
+observer_initials,,,,initials of surveyors,initials of surveyors,character,,
+code,,,,four-letter alpha code of observed taxon,four-letter alpha code of observed taxon,character,,
+common_name,,,,common name of observed taxon,common name of observed taxon,character,,
