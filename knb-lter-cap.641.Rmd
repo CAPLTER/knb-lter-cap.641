@@ -5,6 +5,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+# README
+
 FOR SRBP: there are six birding points at each site, two birding points along
 each of the three transects, yielding, for example, Tonto_mid_B1, Tonto_mid_B2
 (recall that there are three herp plots along each transect). To this point, a
@@ -12,14 +14,8 @@ single birder (formerly Melanie), birded at all six points four times per
 year. The other two birders, birded at a single core site during the two
 regular birding seasons.
 
-```{r libraries}
-library(EML)
-library(tidyverse)
-library(tools)
-library(aws.s3)
-library(capeml)
-library(gioseml)
-```
+_2020-09-05_ For knb-lter-cap.641.5, observation data were filtered to include
+up to only fall 2019 (2019-10-26) as data were QC'd to that point only.
 
 _2020-08-20_ For knb-lter-cap.641.4, observation data were filtered to include
 up to only spring 2019 (2019-05-03) as data were QC'd to that point only.
@@ -34,6 +30,17 @@ impression is that flying was a precursor to FT. A "flying" option is not on
 the current datasheet, nor on an earlier one revised in 2004. I am going to
 omit flying from the publication of these data as I think it is more confusing
 than helpful (and I cannot explain its meaning).
+
+# libraries
+
+```{r libraries}
+library(EML)
+library(tidyverse)
+library(tools)
+library(aws.s3)
+library(capeml)
+library(gioseml)
+```
 
 # srbp_birds
 
@@ -182,7 +189,8 @@ additonal_bird_species_desc <- "additional bird species seen using the habitat b
 
 additonal_bird_species_DT <- create_dataTable(
   dfname = additonal_bird_species,
-  description = additonal_bird_species_desc
+  description = additonal_bird_species_desc,
+  dateRangeField = "survey_date"
 )
 
 ```
@@ -510,25 +518,11 @@ dataFilesToRemove <- dir(pattern = paste0(packageNum, "_"))
 file.remove(dataFilesToRemove)
 
 # EML to S3
-if(length(list.files(pattern = "*.xml")) == 1) {
-  eml_to_amz(list.files(pattern = "*.xml")) } else {
-    print("more than one xml file found")
-  }
+eml_to_amz(list.files(pattern = "^knb.*xml"))
 
 # EML to cap-data-eml and remove file from project
-tryCatch({
-  
-  if(length(list.files(pattern = "*.xml")) == 1) {
-    file.copy(list.files(pattern = "*.xml"), "/home/srearl/localRepos/cap-metadata/cap-data-eml/")
-    file.remove(list.files(pattern = "*.xml")) } else {
-      print("more than one xml file found")
-    }
-},
-warning = function(warn) {
-  print(paste("WARNING: ", warn))
-},
-error = function(err) {
-  print(paste("ERROR: ", err))
-  
-}) # close try catch
-```
+file.copy(
+  list.files(pattern = "^knb.*xml"),
+  "/home/srearl/localRepos/cap-metadata/cap-data-eml/"
+)
+file.remove(list.files(pattern = "^knb.*xml"))
