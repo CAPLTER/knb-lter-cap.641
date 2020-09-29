@@ -7,29 +7,8 @@ editor_options:
 
 # README
 
-FOR SRBP: there are six birding points at each site, two birding points along
-each of the three transects, yielding, for example, Tonto_mid_B1, Tonto_mid_B2
-(recall that there are three herp plots along each transect). To this point, a
-single birder (formerly Melanie), birded at all six points four times per
-year. The other two birders, birded at a single core site during the two
-regular birding seasons.
+content moved to project README.md
 
-_2020-09-05_ For knb-lter-cap.641.5, observation data were filtered to include
-up to only fall 2019 (2019-10-26) as data were QC'd to that point only.
-
-_2020-08-20_ For knb-lter-cap.641.4, observation data were filtered to include
-up to only spring 2019 (2019-05-03) as data were QC'd to that point only.
-
-_2016-12-02_ The meaning of 'flying' in the birds table is unclear. There are
-1962 records where flying = 1. All of these except for two records have
-distance = FT. However, not all records where distance = FT have a distance = 1
-(any any value for that matter). Adding confusion, in her metadata, Corinna has
-listed that flying = NULL is true, but then what would be the meaning of flying
-= 0, and that would mean that most birds were flying. I am not certain, but my
-impression is that flying was a precursor to FT. A "flying" option is not on
-the current datasheet, nor on an earlier one revised in 2004. I am going to
-omit flying from the publication of these data as I think it is more confusing
-than helpful (and I cannot explain its meaning).
 
 # libraries
 
@@ -44,14 +23,15 @@ library(gioseml)
 
 # srbp_birds
 
-```{r srbp_birds}
+note that this select statement does not include wind speed, wind dir, air
+temp, or cloud cover as those variables have not been collected for a long time
+and are not relevant to the more recent SRBP observations
 
-# note that this select statement does not include wind speed, wind dir, air
-# temp, or cloud cover as those variables have not been collected for a long
-# time and are not relevant to the more recent SRBP observations
+```{r srbp-birds}
 
 srbp_birds <- dbGetQuery(mysql_prod, "
 SELECT
+  SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
   sites.site_code,
   surveys.survey_date,
   surveys.time_start,
@@ -80,7 +60,40 @@ JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
 JOIN lter34birds.birds ON (surveys.survey_id = birds.survey_id)
 JOIN lter34birds.bird_taxons ON (birds.bird_taxon_id = bird_taxons.id)
 WHERE
-  sites.sample LIKE 'SRBP'
+surveys.survey_id IN (
+  SELECT
+    srbp_surveys.survey_id
+  FROM(
+    SELECT
+      surveys.survey_id,
+      sites.site_code,
+      SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
+      surveys.survey_date,
+      surveys.observer
+    FROM lter34birds.surveys
+    JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
+    JOIN (
+      SELECT
+        SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
+        surveys.survey_date,
+        surveys.observer
+      FROM lter34birds.surveys
+      JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
+      WHERE
+        sites.sample LIKE 'SRBP'
+      GROUP BY
+        reach,
+        surveys.survey_date,
+        surveys.observer
+      HAVING
+        count(*) > 1
+      ) AS subquery ON (
+      reach = subquery.reach AND
+      surveys.survey_date = subquery.survey_date AND
+      surveys.observer = subquery.observer
+    )
+  ) AS srbp_surveys
+)
 ORDER BY survey_date;")
 
 srbp_birds[srbp_birds == ""] <- NA # lots of missing values, convert to NA
@@ -100,7 +113,7 @@ srbp_birds <- srbp_birds %>%
 
 srbp_birds <- srbp_birds %>%
   mutate(
-    reach = str_extract(site_code, "^[^_]+"),
+    #     reach = str_extract(site_code, "^[^_]+"),
     reach = as.factor(reach),
     survey_date = as.Date(survey_date),
     wind = as.factor(wind),
@@ -151,7 +164,40 @@ JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
 JOIN lter34birds.addl_bird_species ON (surveys.survey_id = addl_bird_species.survey_id)
 JOIN lter34birds.bird_taxons ON (addl_bird_species.bird_taxon_id = bird_taxons.id)
 WHERE
-  sites.sample LIKE 'SRBP'
+surveys.survey_id IN (
+  SELECT
+    srbp_surveys.survey_id
+  FROM(
+    SELECT
+      surveys.survey_id,
+      sites.site_code,
+      SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
+      surveys.survey_date,
+      surveys.observer
+    FROM lter34birds.surveys
+    JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
+    JOIN (
+      SELECT
+        SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
+        surveys.survey_date,
+        surveys.observer
+      FROM lter34birds.surveys
+      JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
+      WHERE
+        sites.sample LIKE 'SRBP'
+      GROUP BY
+        reach,
+        surveys.survey_date,
+        surveys.observer
+      HAVING
+        count(*) > 1
+      ) AS subquery ON (
+      reach = subquery.reach AND
+      surveys.survey_date = subquery.survey_date AND
+      surveys.observer = subquery.observer
+    )
+  ) AS srbp_surveys
+)
 ORDER BY survey_date;")
 
 additonal_bird_species[additonal_bird_species == ""] <- NA # lots of missing values, convert to NA
@@ -275,13 +321,13 @@ library(sf)
 
 srbp_bird_locations <- dbGetQuery(mysql_prod, "
   SELECT
-  s.site_code,
-  blh.lat,
-  blh.`long`
+    s.site_code,
+    blh.lat,
+    blh.`long`
   FROM lter34birds.birds_location_histories blh
   JOIN lter34birds.sites s ON (s.site_id = blh.site_id)
   WHERE
-  s.sample LIKE 'SRBP'
+    s.sample LIKE 'SRBP'
   ORDER BY site_code;") %>%
   mutate(reach = str_extract(site_code, "^[^_]+")) %>%
   dplyr::select(
@@ -313,6 +359,8 @@ srbp_bird_locations_SV <- create_spatialVector(
 # people
 
 ```{r people}
+
+library(gioseml)
 
 # creators
 
@@ -356,7 +404,7 @@ metadataProvider <- list(sally, stevan)
 
 begindate <- as.character(min(srbp_birds$survey_date))
 enddate <- as.character(max(srbp_birds$survey_date))
-geographicDescription <- "CAP LTER study area"
+geographicDescription <- "CAP LTER study area: greater Phoenix, Arizona (USA) metropolitan area and surrounding Sonoran desert region"
 coverage <- set_coverage(
   begin = begindate,
   end = enddate,
@@ -500,6 +548,7 @@ list.files(pattern = paste0(packageNum, "_"))
 Move data and final xml files to respective ASU locations.
 
 ```{r S3_helper_functions}
+
 # functions and setting for uploading to S3
 library(aws.s3)
 source("~/Documents/localSettings/aws.s3")
