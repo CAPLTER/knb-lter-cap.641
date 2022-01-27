@@ -1,0 +1,66 @@
+|
+  - attribute:
+      attributeName: reach
+      levels:
+      - code: Ave35
+        definition: 'Salt River at 35th Ave north of Broadway Road'
+      - code: Ave67
+        definition: 'Salt River at 67th Ave north of Southern Avenue'
+      - code: BM
+        definition: 'Baseline and Meridian Wildlife Area; Salt River at 115th Ave northeast of Phoenix International Raceway'
+      - code: Price
+        definition: 'Salt River near the Price Drain northeast of the loop 101 and loop 202 intersection'
+      - code: Priest
+        definition: 'Salt River flood channel east of Priest Drive and west of Tempe Town Lake dam'
+      - code: Rio
+        definition: 'Salt River at Rio Salado: Central Avenue north of Broadway Road'
+      - code: Tonto
+        definition: 'Salt River in the Tonto National Forest near Usery Road'
+  - attribute:
+      attributeName: distance
+      levels:
+      - code: 0-5
+        definition: 'bird observed within zero to five meters of observer'
+      - code: 10-20
+        definition: 'bird observed ten to twenty meters from observer'
+      - code: 20-40
+        definition: 'bird observed twenty to forty meters from observer'
+      - code: 40+
+        definition: 'bird observed forty or more meters from observer'
+      - code: 5-10
+        definition: 'bird observed five to ten meters from observer'
+      - code: FT
+        definition: 'bird is seen flying through the count area below the tallest structure or vegetation but not observed taking off or landing'
+  - attribute:
+      attributeName: seen
+      levels:
+      - code: 'FALSE'
+        definition: bird not identified by sight
+      - code: 'TRUE'
+        definition: 'bird identified by sight'
+  - attribute:
+      attributeName: heard
+      levels:
+      - code: 'FALSE'
+        definition: 'bird not identified by sound'
+      - code: 'TRUE'
+        definition: 'bird identified by sound'
+  - attribute:
+      attributeName: direction
+      levels:
+      - code: E
+        definition: 'bird observed to the east from the perspective of the surveyor'
+      - code: 'N'
+        definition: 'bird observed to the north from the perspective of the surveyor'
+      - code: NE
+        definition: 'bird observed to the northeast from the perspective of the surveyor'
+      - code: NW
+        definition: 'bird observed to the northwest from the perspective of the surveyor'
+      - code: S
+        definition: 'bird observed to the south from the perspective of the surveyor'
+      - code: SE
+        definition: 'bird observed to the southeast from the perspective of the surveyor'
+      - code: SW
+        definition: 'bird observed to the southwest from the perspective of the surveyor'
+      - code: W
+        definition: 'bird observed to the west from the perspective of the surveyor'

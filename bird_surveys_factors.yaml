@@ -1,0 +1,50 @@
+|
+  - attribute:
+      attributeName: reach
+      levels:
+      - code: Ave35
+        definition: 'Salt River at 35th Ave north of Broadway Road'
+      - code: Ave67
+        definition: 'Salt River at 67th Ave north of Southern Avenue'
+      - code: BM
+        definition: 'Baseline and Meridian Wildlife Area; Salt River at 115th Ave northeast of Phoenix International Raceway'
+      - code: Price
+        definition: 'Salt River near the Price Drain northeast of the loop 101 and loop 202 intersection'
+      - code: Priest
+        definition: 'Salt River flood channel east of Priest Drive and west of Tempe Town Lake dam'
+      - code: Rio
+        definition: 'Salt River at Rio Salado: Central Avenue north of Broadway Road'
+      - code: Tonto
+        definition: 'Salt River in the Tonto National Forest near Usery Road'
+  - attribute:
+      attributeName: wind
+      levels:
+      - code: gusts
+        definition: 'wind gusts during the survey window'
+      - code: light
+        definition: 'light wind during the survey window'
+      - code: none
+        definition: 'no perceptible wind during the survey window'
+  - attribute:
+      attributeName: precipitation
+      levels:
+      - code: light_rain
+        definition: 'light rain during the survey window'
+      - code: none
+        definition: 'no precipitation during the survey window'
+  - attribute:
+      attributeName: disturbances
+      levels:
+      - code: 'FALSE'
+        definition: 'no perceptible disturbance to observer or in the vicinity during the survey window'
+      - code: 'TRUE'
+        definition: 'disturbance occurred during the survey'
+  - attribute:
+      attributeName: noise_level
+      levels:
+      - code: high
+        definition: 'high level of noise during the survey'
+      - code: low
+        definition: 'low level noise during the survey'
+      - code: none
+        definition: 'no noise during survey'

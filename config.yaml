@@ -1,5 +1,8 @@
 packageNum: 641
-packageIdent: knb-lter-cap.641.6
+packageIdent: knb-lter-cap.641.7
+baseURL: https://data.gios.asu.edu/datasets/cap/
+project: lter
 title: "Point-count bird censusing: long-term monitoring of bird abundance and diversity along the Salt River in the greater Phoenix metropolitan area, ongoing since 2013"
+maintenance: regular
 geographicCoverage:
   geographicDescription: "CAP LTER study area: greater Phoenix, Arizona (USA) metropolitan area and surrounding Sonoran desert region"

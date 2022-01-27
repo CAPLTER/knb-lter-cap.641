@@ -9,36 +9,183 @@ editor_options:
 
 content moved to project README.md
 
+# bird observations
 
-# libraries
-
-```{r libraries}
-library(EML)
-library(tidyverse)
-library(tools)
-library(aws.s3)
-library(capeml)
-library(gioseml)
-```
-
-# srbp_birds
+## observations: query
 
 note that this select statement does not include wind speed, wind dir, air
 temp, or cloud cover as those variables have not been collected for a long time
 and are not relevant to the more recent SRBP observations
 
-```{r srbp-birds}
+```{r srbp-bird-observations}
 
-srbp_birds <- dbGetQuery(mysql_prod, "
+bird_observations <- DBI::dbGetQuery(pg, "
 SELECT
-  SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
+  surveys.id AS survey_id,
+  SPLIT_PART(sites.site_code, '_', 1) AS reach,
   sites.site_code,
   surveys.survey_date,
   surveys.time_start,
   surveys.time_end,
-  surveys.observer,
-  surveys.notes AS survey_notes,
-  surveys.human_activity_notes,
+  observers.observer,
+  bird_taxa.code,
+  bird_taxa.common_name,
+  bird_observations.distance,
+  bird_observations.bird_count,
+  bird_observations.notes AS observation_notes,
+  bird_observations.seen,
+  bird_observations.heard,
+  bird_observations.direction,
+  bird_observations.qccomment
+FROM core_birds.surveys
+JOIN core_birds.sites ON (surveys.site_id = sites.id)
+JOIN core_birds.bird_observations ON (bird_observations.survey_id = surveys.id)
+JOIN core_birds.bird_taxa ON (bird_observations.bird_taxon_id = bird_taxa.id)
+JOIN core_birds.observers ON (observers.id = surveys.observer_id)
+WHERE
+surveys.id IN (
+  SELECT
+    srbp_surveys.id
+  FROM(
+    SELECT
+      surveys.id,
+      sites.site_code,
+      SPLIT_PART(sites.site_code, '_', 1) AS reach,
+      surveys.survey_date,
+      observers.observer
+    FROM core_birds.surveys
+    JOIN core_birds.sites ON (surveys.site_id = sites.id)
+    JOIN core_birds.observers ON (observers.id = surveys.observer_id)
+    JOIN (
+      SELECT
+        SPLIT_PART(sites.site_code, '_', 1) AS reach,
+        surveys.survey_date,
+        observers.observer
+      FROM core_birds.surveys
+      JOIN core_birds.sites ON (surveys.site_id = sites.id)
+      JOIN core_birds.observers ON (observers.id = surveys.observer_id)
+      WHERE
+        sites.location_type LIKE 'SRBP'
+      GROUP BY
+        reach,
+        surveys.survey_date,
+        observers.observer
+      HAVING
+      count(*) > 1
+      ) AS subquery ON (
+        reach = subquery.reach AND
+        surveys.survey_date = subquery.survey_date AND
+        observers.observer  = subquery.observer
+    )
+  ) AS srbp_surveys
+)
+ORDER BY surveys.survey_date
+;
+")
+
+bird_observations[bird_observations == ""] <- NA # lots of missing values, convert to NA
+
+```
+
+## observations: observers
+
+```{r bird-observations-observers, eval=TRUE}
+
+bird_observations <- bird_observations |>
+  tidyr::separate(observer, c("name1", "name2", "name3"), " ", remove = T) |>
+  dplyr::mutate(
+    namePart1 = tools::toTitleCase(stringr::str_extract(name1, "\\b\\w{2}")),
+    namePart2 = tools::toTitleCase(stringr::str_extract(name2, "\\b\\w{2}")),
+    namePart3 = tools::toTitleCase(stringr::str_extract(name3, "\\b\\w{2}"))
+    ) |>
+  dplyr::mutate(
+    observer = dplyr::case_when(
+      is.na(namePart3) ~ paste0(namePart1, namePart2),
+      !is.na(namePart3) ~ paste0(namePart1, namePart2, namePart3)
+    )
+    ) |>
+  dplyr::select(
+    -name1,
+    -name2,
+    -name3,
+    -contains("namePart")
+  )
+
+```
+
+## observations: conversions
+
+```{r bird-observations-conversions, eval=TRUE}
+
+bird_observations <- bird_observations |>
+  dplyr::mutate(
+    survey_id   = as.character(survey_id),
+    reach       = as.factor(reach),
+    survey_date = as.Date(survey_date),
+    distance    = as.factor(distance),
+    seen        = as.factor(seen),
+    heard       = as.factor(heard),
+    direction   = as.factor(direction)
+    ) |>
+  dplyr::select(
+    survey_id:time_end,
+    observer,
+    code:last_col()
+  )
+
+```
+
+## observations: filter
+
+The `core-birds-SQL` chunk will query all observation data in the database but
+these are not necessarily QC'd; rather than editing the SQL query, we can cull
+the full sample set to only those data that are QC'd in this workflow.
+Addressed at this step as survey_date has been explicitly declared a date type
+in the above chunk.
+
+```{r bird-observations-filter, eval=TRUE}
+
+bird_observations <- bird_observations |>
+  dplyr::filter(survey_date <= "2019-09-01")
+
+```
+
+## observations: data table
+
+```{r bird-observations-DT, eval=TRUE}
+
+try({
+  capeml::write_attributes(bird_observations, overwrite = FALSE)
+  capeml::write_factors(bird_observations, overwrite = FALSE)
+})
+
+bird_observations_desc <- "bird survey sampling details (site, date, time, observer) and birds observed during the survey windows (type, number, distance from observer, behavior)"
+
+bird_observations_DT <- capeml::create_dataTable(
+  dfname         = bird_observations,
+  description    = bird_observations_desc,
+  dateRangeField = "survey_date"
+)
+
+```
+
+# bird surveys
+
+## surveys: query
+
+```{r bird-surveys-query, eval=TRUE, echo=TRUE, message=TRUE}
+
+bird_surveys <- DBI::dbGetQuery(pg, "
+SELECT
+  surveys.id AS survey_id,
+  SPLIT_PART(sites.site_code, '_', 1) AS reach,
+  sites.site_code,
+  surveys.survey_date,
+  surveys.time_start,
+  surveys.time_end,
+  observers.observer,
+  -- surveys.notes AS survey_notes,
+  -- surveys.human_activity_notes,
   surveys.wind,
   surveys.precipitation,
   surveys.disturbances,
@@ -46,249 +193,214 @@ SELECT
   surveys.noise_level,
   surveys.site_condition,
   surveys.non_bird_species,
-  bird_taxons.code,
-  bird_taxons.common_name,
-  birds.distance,
-  birds.bird_count,
-  birds.notes AS observation_notes,
-  birds.seen,
-  birds.heard,
-  birds.direction,
-  birds.QCcomment
-FROM lter34birds.surveys
-JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
-JOIN lter34birds.birds ON (surveys.survey_id = birds.survey_id)
-JOIN lter34birds.bird_taxons ON (birds.bird_taxon_id = bird_taxons.id)
-WHERE
-surveys.survey_id IN (
+  additional_birds.additional_bird_observations
+FROM core_birds.surveys
+JOIN core_birds.sites ON (surveys.site_id = sites.id)
+JOIN core_birds.observers ON (observers.id = surveys.observer_id)
+LEFT JOIN (
   SELECT
-    srbp_surveys.survey_id
+    survey_id,
+    STRING_AGG(bird_taxa.code, '; ') AS additional_bird_observations
+  FROM core_birds.additional_bird_observations
+  JOIN core_birds.bird_taxa ON (bird_taxa.id = additional_bird_observations.bird_taxon_id)
+  GROUP BY survey_id
+) AS additional_birds ON (additional_birds.survey_id = surveys.id)
+WHERE
+surveys.id IN (
+  SELECT
+    srbp_surveys.id
   FROM(
     SELECT
-      surveys.survey_id,
+      surveys.id,
       sites.site_code,
-      SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
+      SPLIT_PART(sites.site_code, '_', 1) AS reach,
       surveys.survey_date,
-      surveys.observer
-    FROM lter34birds.surveys
-    JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
+      observers.observer
+    FROM core_birds.surveys
+    JOIN core_birds.sites ON (surveys.site_id = sites.id)
+    JOIN core_birds.observers ON (observers.id = surveys.observer_id)
     JOIN (
       SELECT
-        SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
+        SPLIT_PART(sites.site_code, '_', 1) AS reach,
         surveys.survey_date,
-        surveys.observer
-      FROM lter34birds.surveys
-      JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
+        observers.observer
+      FROM core_birds.surveys
+      JOIN core_birds.sites ON (surveys.site_id = sites.id)
+      JOIN core_birds.observers ON (observers.id = surveys.observer_id)
       WHERE
-        sites.sample LIKE 'SRBP'
+        sites.location_type LIKE 'SRBP'
       GROUP BY
         reach,
         surveys.survey_date,
-        surveys.observer
+        observers.observer
       HAVING
-        count(*) > 1
+      count(*) > 1
       ) AS subquery ON (
-      reach = subquery.reach AND
-      surveys.survey_date = subquery.survey_date AND
-      surveys.observer = subquery.observer
+        reach = subquery.reach AND
+        surveys.survey_date = subquery.survey_date AND
+        observers.observer  = subquery.observer
     )
   ) AS srbp_surveys
 )
-ORDER BY survey_date;")
+ORDER BY surveys.survey_date
+;
+")
 
-srbp_birds[srbp_birds == ""] <- NA # lots of missing values, convert to NA
+# convert any missing to NA
+bird_surveys[bird_surveys == ""] <- NA
+  
+```
 
-# pulling this code out separately owing to its verbosity for a singular
-# purpose: getting the intials of the observers and presenting those instead of
-# the full name
+## surveys: observers
 
-srbp_birds <- srbp_birds %>%
-  mutate(observer = toupper(observer)) %>%
-  separate(observer, c("name1", "name2"), " ", remove = T) %>%
-  mutate(
-    init1 = str_extract(name1, "\\b\\w"),
-    init2 = str_extract(name2, "\\b\\w")
-    ) %>%
-  unite(observer_initials, init1, init2, sep = "", remove = T)
+```{r bird-surveys-observers, eval=TRUE}
 
-srbp_birds <- srbp_birds %>%
-  mutate(
-    #     reach = str_extract(site_code, "^[^_]+"),
-    reach = as.factor(reach),
-    survey_date = as.Date(survey_date),
-    wind = as.factor(wind),
+bird_surveys <- bird_surveys |>
+  tidyr::separate(observer, c("name1", "name2", "name3"), " ", remove = T) |>
+  dplyr::mutate(
+    namePart1 = tools::toTitleCase(stringr::str_extract(name1, "\\b\\w{2}")),
+    namePart2 = tools::toTitleCase(stringr::str_extract(name2, "\\b\\w{2}")),
+    namePart3 = tools::toTitleCase(stringr::str_extract(name3, "\\b\\w{2}"))
+    ) |>
+  dplyr::mutate(
+    observer = dplyr::case_when(
+      is.na(namePart3) ~ paste0(namePart1, namePart2),
+      !is.na(namePart3) ~ paste0(namePart1, namePart2, namePart3)
+    )
+    ) |>
+  dplyr::select(
+    -name1,
+    -name2,
+    -name3,
+    -contains("namePart")
+  )
+
+```
+
+## surveys: conversions
+
+```{r bird-surveys-conversions, eval=TRUE}
+
+bird_surveys <- bird_surveys |>
+  dplyr::mutate(
+    survey_id     = as.character(survey_id),
+    reach         = as.factor(reach),
+    survey_date   = as.Date(survey_date),
+    wind          = as.factor(wind),
     precipitation = as.factor(precipitation),
-    disturbances = as.factor(disturbances),
-    noise_level = as.factor(noise_level),
-    distance = as.factor(distance),
-    seen = as.factor(seen),
-    heard = as.factor(heard),
-    direction = as.factor(direction)
-    ) %>%
-select(
-  site_code,
-  reach,
-  survey_date:time_end,
-  observer_initials,
-  survey_notes:QCcomment
-)
+    disturbances  = as.factor(disturbances),
+    noise_level   = as.factor(noise_level)
+    ) |>
+  dplyr::select(
+    survey_id:time_end,
+    observer,
+    wind:last_col()
+  )
 
-# write_attributes(srbp_birds)
-# write_factors(srbp_birds)
+```
 
-srbp_birds_desc <- "bird survey sampling details (site, reach, date, time, observer, site conditions, and notes) and birds surveyed (type, number, distance from observer, behavior)"
+## surveys: filter
 
-srbp_birds_DT <- create_dataTable(
-  dfname = srbp_birds,
-  description = srbp_birds_desc,
+The `core-birds-SQL` chunk will query all observation data in the database but
+these are not necessarily QC'd; rather than editing the SQL query, we can cull
+the full sample set to only those data that are QC'd in this workflow.
+Addressed at this step as survey_date has been explicitly declared a date type
+in the above chunk.
+
+```{r bird-surveys-filter, eval=TRUE}
+
+bird_surveys <- bird_surveys |>
+  dplyr::filter(survey_date <= "2019-09-01")
+
+```
+
+## surveys: data table
+
+```{r bird-surveys, eval=TRUE}
+
+dplyr::glimpse(bird_surveys)
+
+try({
+  capeml::write_attributes(bird_surveys, overwrite = FALSE)
+  capeml::write_factors(bird_surveys, overwrite = FALSE)
+})
+
+bird_surveys_desc <- "bird survey sampling details including survey location, date, times, observer, conditions at the site during the survey, and birds and other animals observed at the survey site but outside the designated survey window"
+
+bird_surveys_DT <- capeml::create_dataTable(
+  dfname         = bird_surveys,
+  description    = bird_surveys_desc,
   dateRangeField = "survey_date"
 )
 
 ```
-
-# additonal_bird_species
-
-```{r additonal-bird-species, eval=TRUE}
-
-additonal_bird_species <- dbGetQuery(mysql_prod, "
-SELECT
-  sites.site_code,
-  surveys.survey_date,
-  surveys.time_start,
-  surveys.time_end,
-  surveys.observer,
-  bird_taxons.code,
-  bird_taxons.common_name
-FROM lter34birds.surveys
-JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
-JOIN lter34birds.addl_bird_species ON (surveys.survey_id = addl_bird_species.survey_id)
-JOIN lter34birds.bird_taxons ON (addl_bird_species.bird_taxon_id = bird_taxons.id)
-WHERE
-surveys.survey_id IN (
-  SELECT
-    srbp_surveys.survey_id
-  FROM(
-    SELECT
-      surveys.survey_id,
-      sites.site_code,
-      SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
-      surveys.survey_date,
-      surveys.observer
-    FROM lter34birds.surveys
-    JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
-    JOIN (
-      SELECT
-        SUBSTRING_INDEX(sites.site_code, '_', 1) AS reach,
-        surveys.survey_date,
-        surveys.observer
-      FROM lter34birds.surveys
-      JOIN lter34birds.sites ON (surveys.site_id = sites.site_id)
-      WHERE
-        sites.sample LIKE 'SRBP'
-      GROUP BY
-        reach,
-        surveys.survey_date,
-        surveys.observer
-      HAVING
-        count(*) > 1
-      ) AS subquery ON (
-      reach = subquery.reach AND
-      surveys.survey_date = subquery.survey_date AND
-      surveys.observer = subquery.observer
-    )
-  ) AS srbp_surveys
-)
-ORDER BY survey_date;")
-
-additonal_bird_species[additonal_bird_species == ""] <- NA # lots of missing values, convert to NA
-
-additonal_bird_species <- additonal_bird_species %>%
-  mutate(observer = toupper(observer)) %>%
-  separate(observer, c("name1", "name2"), " ", remove = T) %>%
-  mutate(
-    init1 = str_extract(name1, "\\b\\w"),
-    init2 = str_extract(name2, "\\b\\w")
-    ) %>%
-  unite(observer_initials, init1, init2, sep = "", remove = T)
-
-additonal_bird_species <- additonal_bird_species %>%
-  mutate(
-    reach = str_extract(site_code, "^[^_]+"),
-    reach = as.factor(reach),
-    survey_date = as.Date(survey_date)
-    ) %>%
-select(
-  site_code,
-  reach,
-  survey_date,
-  time_start,
-  time_end,
-  observer_initials,
-  code,
-  common_name
-)
-
-# write_attributes(additonal_bird_species)
-# write_factors(additonal_bird_species)
-
-additonal_bird_species_desc <- "additional bird species seen using the habitat but not recorded during the count"
-
-additonal_bird_species_DT <- create_dataTable(
-  dfname = additonal_bird_species,
-  description = additonal_bird_species_desc,
-  dateRangeField = "survey_date"
-)
-
-```
-
 
 There is not enough detail concerning the SRBP sites in the lter34.sites table
 to warrant pulling that information. However, SRBP reach characteristics are
 relevant so we will publish those details
 
-# reach_characteristics
+# reach characteristics
 
-```{r reach_characteristics}
+## reach characteristics: query
 
-srbp_reach_characteristics <- dbGetQuery(mysql_prod, "
-SELECT
-  s.site_code
-FROM lter34birds.sites s
-WHERE
-  s.sample LIKE 'SRBP'
-ORDER BY site_code;") %>%
-  mutate(reach = str_extract(site_code, "^[^_]+")) %>%
-  select(site_code, reach)
+```{r reach-characteristics-query}
 
-herps_reach_chars <- dbGetQuery(pg_prod, "
-SELECT
-  reach,
-  urbanized,
-  restored,
-  water
-FROM herpetofauna.river_reaches;")
+reach_characteristics <- DBI::dbGetQuery(pg, "
+  SELECT
+    s.site_code
+  FROM core_birds.sites s
+  WHERE
+    s.location_type LIKE 'SRBP'
+  ORDER BY
+    site_code
+  ;"
+  ) |>
+  dplyr::mutate(reach = stringr::str_extract(site_code, "^[^_]+")) |>
+  dplyr::select(site_code, reach)
 
-srbp_reach_characteristics <- inner_join(srbp_reach_characteristics, herps_reach_chars, by = c("reach")) %>%
-  mutate(
-    reach = as.factor(reach),
+herps_reach_chars <- dbGetQuery(pg, "
+  SELECT
+    reach,
+    urbanized,
+    restored,
+    water
+  FROM herpetofauna.river_reaches
+  ;"
+)
+
+reach_characteristics <- dplyr::inner_join(
+  reach_characteristics,
+  herps_reach_chars,
+  by = c("reach")
+  ) |>
+  dplyr::mutate(
+    reach     = as.factor(reach),
     urbanized = as.factor(urbanized),
-    restored = as.factor(restored),
-    water = as.factor(water)
+    restored  = as.factor(restored),
+    water     = as.factor(water)
   )
 
-srbp_reach_characteristics_desc <- "Salt River reach location of each sampling site, and general characteristics of that portion of the river where sampling is conducted"
+```
 
-# write_attributes(srbp_reach_characteristics)
-# write_factors(srbp_reach_characteristics)
+## reach characteristics: data table
 
-srbp_reach_characteristics_DT <- create_dataTable(
-  dfname = srbp_reach_characteristics,
-  description = srbp_reach_characteristics_desc
+```{r reach-characteristics-table}
+
+reach_characteristics_desc <- "Salt River reach location of each sampling site and general characteristics of that portion of the river where sampling is conducted"
+
+try({
+  capeml::write_attributes(reach_characteristics, overwrite = FALSE)
+  capeml::write_factors(reach_characteristics, overwrite = FALSE)
+})
+
+srbp_reach_characteristics_DT <- capeml::create_dataTable(
+  dfname      = reach_characteristics,
+  description = reach_characteristics_desc
 )
 
 ```
 
-# srbp_bird_locations 
+# survey locations 
 
 Get the bird survey locations. Here we are extracting these data from the
 database as opposed to using an existing shapefile as I am presenting only the
@@ -314,44 +426,53 @@ position details.
 
 see core birds for the query if you want only the current sites
 
-```{r spatial_data}
+## survey locations: query
 
-library(capemlGIS)
-library(sf)
+```{r survey-locations-query}
 
-srbp_bird_locations <- dbGetQuery(mysql_prod, "
+survey_locations <- DBI::dbGetQuery(pg, "
   SELECT
-    s.site_code,
-    blh.lat,
-    blh.`long`
-  FROM lter34birds.birds_location_histories blh
-  JOIN lter34birds.sites s ON (s.site_id = blh.site_id)
+    sites.site_code,
+    location_histories.lat,
+    location_histories.long
+  FROM core_birds.location_histories
+  JOIN core_birds.sites ON (sites.id = location_histories.site_id)
   WHERE
-    s.sample LIKE 'SRBP'
-  ORDER BY site_code;") %>%
-  mutate(reach = str_extract(site_code, "^[^_]+")) %>%
+    sites.location_type LIKE 'SRBP'
+  ORDER BY site_code
+  ;
+  ") |>
+  dplyr::mutate(reach = stringr::str_extract(site_code, "^[^_]+")) |>
   dplyr::select(
-    Name = reach,
+    reach,
     lat,
     long
   )
 
-  srbp_bird_locations <- st_as_sf(
-    x = srbp_bird_locations,
+survey_locations <- sf::st_as_sf(
+    x      = survey_locations,
     coords = c("long", "lat"),
-    crs = 4326
-    ) %>%
-  group_by(Name) %>%
-  summarise() %>%
-  st_convex_hull()
+    crs    = 4326
+    ) |>
+  dplyr::group_by(reach) |>
+  dplyr::summarise() |>
+  sf::st_convex_hull()
 
-# write_attributes(srbp_bird_locations)
+mapview::mapview(survey_locations)
 
-srbp_bird_locations_desc <- "bird survey locations at select locations along the Salt River in the greater Phoenix metropolitan area; polygons reflect the combined area of all bird survey locations (current and historic) at each river reach"
+```
 
-srbp_bird_locations_SV <- create_spatialVector(
-  svname = srbp_bird_locations,
-  description = srbp_bird_locations_desc
+## survey locations: vector
+
+```{r survey-locations-vector}
+
+try(capeml::write_attributes(survey_locations, overwrite = FALSE))
+
+survey_locations_desc <- "bird survey locations at select locations along the Salt River in the greater Phoenix metropolitan area; polygons reflect the combined area of all bird survey locations (current and historic) at each river reach"
+
+survey_locations_SV <- capemlGIS::create_vector(
+  vector_name = survey_locations,
+  description = survey_locations_desc
 )
 
 ```
@@ -360,38 +481,34 @@ srbp_bird_locations_SV <- create_spatialVector(
 
 ```{r people}
 
-library(gioseml)
-
 # creators
 
-# heather <- addCreator('h', 'bateman')
-# paige <- addCreator('paig', 'warren')
-# danChilders <- addCreator('d', 'childers')
-
-heather <- create_role(
+heather <- gioseml::create_role(
   firstName = "heather",
-  lastName = "bateman",
-  roleType = "creator"
+  lastName  = "bateman",
+  roleType  = "creator"
 )
-paige <- create_role(
+
+paige <- gioseml::create_role(
   firstName = "paige",
-  lastName = "warren",
-  roleType = "creator"
+  lastName  = "warren",
+  roleType  = "creator"
 )
 
 creators <- list(heather, paige)
 
 # metadata providers
 
-stevan <- create_role(
+stevan <- gioseml::create_role(
   firstName = "stevan",
-  lastName = "earl",
-  roleType = "meta"
+  lastName  = "earl",
+  roleType  = "meta"
 )
-sally <- create_role(
+
+sally <- gioseml::create_role(
   firstName = "sally",
-  lastName = "wittlinger",
-  roleType = "meta"
+  lastName  = "wittlinger",
+  roleType  = "meta"
 )
 
 metadataProvider <- list(sally, stevan)
@@ -402,59 +519,48 @@ metadataProvider <- list(sally, stevan)
 
 ```{r coverages}
 
-begindate <- as.character(min(srbp_birds$survey_date))
-enddate <- as.character(max(srbp_birds$survey_date))
-geographicDescription <- "CAP LTER study area: greater Phoenix, Arizona (USA) metropolitan area and surrounding Sonoran desert region"
-coverage <- set_coverage(
-  begin = begindate,
-  end = enddate,
-  geographicDescription = geographicDescription,
-  west = -112.305, east = -111.609,
-  north = +33.56, south = +33.3825
+begindate <- as.character(min(bird_surveys$survey_date))
+enddate   <- as.character(max(bird_surveys$survey_date))
+geo_desc  <- yaml::yaml.load_file("config.yaml")$geographicCoverage$geographicDescription
+
+coverage <- EML::set_coverage(
+  begin                 = begindate,
+  end                   = enddate,
+  geographicDescription = geo_desc,
+  west                  = sf::st_bbox(survey_locations)[["xmin"]],
+  east                  = sf::st_bbox(survey_locations)[["xmax"]],
+  north                 = sf::st_bbox(survey_locations)[["ymax"]],
+  south                 = sf::st_bbox(survey_locations)[["ymin"]]
 )
 
 ```
 
 ## taxonomic coverage
 
-Taxonomic coverage(s) are constructed using EDI's taxonomyCleanr tool suite.
-
-*Note* that the `taxa_map.csv` built with the `create_taxa_map()` function and
-resolving taxonomic IDs (i.e., `resolve_comm_taxa()`) only needs to be run once,
-a potentially long process, per version/session -- the taxonomicCoverage can be
-built as many times as needed with `resolve_comm_taxa()` once the `taxa_map.csv`
-has been generated and the taxonomic IDs resolved.
-
 ```{r taxonomyCleanr, eval=FALSE}
 
-library(taxonomyCleanr)
-
 my_path <- getwd() # taxonomyCleanr requires a path (to build the taxa_map)
-
-# Example: draw taxonomic information from existing resource:
-
-# plant taxa listed in the om_transpiration_factors file
-birdTaxa <- srbp_birds %>%
-  distinct(common_name) %>%
-  tibble()
 
 # create or update map. A taxa_map.csv is the heart of taxonomyCleanr. This
 # function will build the taxa_map.csv and put it in the path identified with
 # my_path.
-create_taxa_map(path = my_path, x = birdTaxa, col = "common_name")
+taxonomyCleanr::create_taxa_map(
+  path = my_path,
+  x    = bird_observations,
+  col  = "common_name"
+)
 
-# Resolve taxa by attempting to match the taxon name (data.source 3 is ITIS but
-# other sources are accessible). Use `resolve_comm_taxa` instead of
-# `resolve_sci_taxa` if taxa names are common names but note that ITIS
-# (data.source 3) is the only authority taxonomyCleanr will allow for common
-# names.
-resolve_comm_taxa(path = my_path, data.sources = 3) # in this case, 3 is ITIS
+taxonomyCleanr::resolve_comm_taxa(
+  path         = my_path,
+  data.sources = 3
+) # 3 ~ ITIS
 
 # build the EML taxonomomic coverage
-taxaCoverage <- make_taxonomicCoverage(path = my_path)
+taxaCoverage <- taxonomyCleanr::make_taxonomicCoverage(path = my_path)
 
-# add taxonomic to the other coverages
+# add taxonomic to other coverages
 coverage$taxonomicCoverage <- taxaCoverage
+
 ```
 
 # dataset
@@ -464,67 +570,25 @@ Projects scopes include lter (default), urex, ltreb, and som.
 
 ```{r construct-dataset}
 
-dataset <- create_dataset()
-```
-
-# add dataTable
-
-```{r dataSet$dataTable}
-
-# add dataTables if relevant
-
-print(ls(pattern = "_DT"))
-
-if (length(ls(pattern = "_DT")) > 0) {
-
-  listOfDataTables <- lapply(ls(pattern = "_DT"), function(DT) { get(DT) } )
-
-  dataset$dataTable  <- listOfDataTables
-
-}
-
-# or add manually
-# dataset$dataTable <- list(dataTableOne, dataTableTwo)
-
-```
-
-# add spatialVector
-
-```{r dataSet$spatialVector}
-
-# add spatial vectors if relevant
-
-print(ls(pattern = "_SV"))
-
-if (length(ls(pattern = "_SV")) > 0) {
-
-  listOfSpatialVectors <- lapply(ls(pattern = "_SV"), function(SV) { get(SV) } )
-
-  dataset$spatialVector  <- listOfSpatialVectors
-
-}
-
-# or add manually
-# dataset$spatialVector <- list(spatialVectorOne, spatialVectorTwo)
-
+dataset <- capeml::create_dataset()
 ```
 
 # eml
 
-```{r construct_eml, eval=TRUE}
+```{r construct-eml, eval=TRUE}
 
-eml <- create_eml()
+eml <- capeml::create_eml()
 ```
 
-```{r validate_eml, eval=TRUE}
+```{r validate-eml, eval=TRUE}
 
-eml_validate(eml)
+EML::eml_validate(eml)
 ```
 
-```{r eml_to_file, eval=TRUE}
+```{r eml-to-file, eval=TRUE}
 
 # write the eml to file
-write_cap_eml()
+capeml::write_cap_eml()
 ```
 
 # file placement
@@ -536,7 +600,7 @@ if (!file.exists("config.yaml")) {
   stop("config.yaml not found")
 }
 packageIdent <- yaml::yaml.load_file("config.yaml")$packageIdent
-packageNum <- yaml::yaml.load_file("config.yaml")$packageNum
+packageNum   <- yaml::yaml.load_file("config.yaml")$packageNum
 ```
 
 ```{r preview_data_file_to_upload}
@@ -557,7 +621,7 @@ source("~/Documents/localSettings/aws.s3")
 ```{r upload_data_S3}
 
 # upload files to S3
-lapply(list.files(pattern = paste0(packageNum, "_")), data_to_amz)
+lapply(list.files(pattern = paste0(packageNum, "_")), gioseml::data_to_amz)
 ```
 
 ```{r clean_up}
@@ -567,7 +631,7 @@ dataFilesToRemove <- dir(pattern = paste0(packageNum, "_"))
 file.remove(dataFilesToRemove)
 
 # EML to S3
-eml_to_amz(list.files(pattern = "^knb.*xml"))
+gioseml::eml_to_amz(list.files(pattern = "^knb.*xml"))
 
 # EML to cap-data-eml and remove file from project
 file.copy(
@@ -575,3 +639,74 @@ file.copy(
   "/home/srearl/localRepos/cap-metadata/cap-data-eml/"
 )
 file.remove(list.files(pattern = "^knb.*xml"))
+
+```
+
+# EDI
+
+## EDI: login
+
+```{r edi-login, eval=TRUE, echo=TRUE, message=TRUE}
+
+EDIutils::login(
+  userId   = keyring::key_get("edi_user"),
+  userPass = keyring::key_get("edi_pass")
+)
+
+```
+
+## EDI: evaluate
+
+```{r edi-evaluate, eval=TRUE, echo=TRUE, message=TRUE}
+
+evaluation <- EDIutils::evaluate_data_package(
+  eml         = paste0(packageIdent, ".xml"),
+  useChecksum = FALSE,
+  env         = "staging"
+)
+
+Sys.sleep(10)
+
+eval_status <- EDIutils::check_status_evaluate(
+  transaction = evaluation,
+  env         = "staging"
+)
+
+if (eval_status) {
+
+  # evalution summary
+
+  EDIutils::read_evaluate_report_summary(
+    transaction = evaluation,
+    env         = "staging"
+  )
+
+}
+
+# evalution detailed
+
+# EDIutils::read_evaluate_report(
+#   transaction = evaluation,
+#   env         = "production"
+# )
+
+```
+
+## EDI: update
+
+```{r edi-update, eval=TRUE, echo=TRUE, message=TRUE}
+
+EDIutils::update_data_package(
+  eml         = paste0(packageIdent, ".xml"),
+  env         = "production"
+)
+
+```
+
+## EDI: logout
+
+```{r edi-logout, eval=TRUE, echo=TRUE, message=TRUE}
+
+EDIutils::logout()
+
+```

@@ -1,0 +1,79 @@
+|
+  survey_id:
+    attributeName: survey_id
+    attributeDefinition: 'bird survey unique identifier'
+    columnClasses: character
+    definition: ''
+  reach:
+    attributeName: reach
+    attributeDefinition: 'sampling location along the Salt River'
+    columnClasses: factor
+  site_code:
+    attributeName: site_code
+    attributeDefinition: 'survey location identifier'
+    columnClasses: character
+    definition: ''
+  survey_date:
+    attributeName: survey_date
+    attributeDefinition: 'survey date'
+    columnClasses: Date
+    formatString: YYYY-MM-DD
+  time_start:
+    attributeName: time_start
+    attributeDefinition: 'survey start time'
+    columnClasses: Date
+    formatString: hh:mm:ss
+  time_end:
+    attributeName: time_end
+    attributeDefinition: 'survey end time'
+    columnClasses: Date
+    formatString: hh:mm:ss
+  observer:
+    attributeName: observer
+    attributeDefinition: 'truncated name of bird surveyor'
+    columnClasses: character
+    definition: ''
+  code:
+    attributeName: code
+    attributeDefinition: 'four-letter alpha code of observed taxon'
+    columnClasses: character
+    definition: ''
+  common_name:
+    attributeName: common_name
+    attributeDefinition: 'common name of observed taxon'
+    columnClasses: character
+    definition: ''
+  distance:
+    attributeName: distance
+    attributeDefinition: 'relative distance or position of observed bird(s) relative to the observer'
+    columnClasses: factor
+  bird_count:
+    attributeName: bird_count
+    attributeDefinition: 'quantity of the observed taxon'
+    unit: 'number'
+    numberType: natural
+    minimum: 1
+    maximum: 700
+    columnClasses: numeric
+  observation_notes:
+    attributeName: observation_notes
+    attributeDefinition: 'notes regarding bird observation'
+    columnClasses: character
+    definition: ''
+  seen:
+    attributeName: seen
+    attributeDefinition: 'indication of whether the bird was seen'
+    columnClasses: factor
+  heard:
+    attributeName: heard
+    attributeDefinition: 'indication of whether the bird was heard'
+    columnClasses: factor
+  direction:
+    attributeName: direction
+    attributeDefinition: 'direction of the bird relative to the surveyor'
+    columnClasses: factor
+  qccomment:
+    attributeName: qccomment
+    attributeDefinition: 'comment regarding specifically the accuracy of the observation'
+    columnClasses: character
+    definition: ''

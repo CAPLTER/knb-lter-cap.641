@@ -1,0 +1,39 @@
+|
+  - attribute:
+      attributeName: reach
+      levels:
+      - code: Ave35
+        definition: 'Salt River at 35th Ave north of Broadway Road'
+      - code: Ave67
+        definition: 'Salt River at 67th Ave north of Southern Avenue'
+      - code: BM
+        definition: 'Baseline and Meridian Wildlife Area; Salt River at 115th Ave northeast of Phoenix International Raceway'
+      - code: Price
+        definition: 'Salt River near the Price Drain northeast of the loop 101 and loop 202 intersection'
+      - code: Priest
+        definition: 'Salt River flood channel east of Priest Drive and west of Tempe Town Lake dam'
+      - code: Rio
+        definition: 'Salt River at Rio Salado: Central Avenue north of Broadway Road'
+      - code: Tonto
+        definition: 'Salt River in the Tonto National Forest near Usery Road'
+  - attribute:
+      attributeName: urbanized
+      levels:
+      - code: NonUrban
+        definition: 'outside urban area'
+      - code: Urban
+        definition: 'in urban area'
+  - attribute:
+      attributeName: restored
+      levels:
+      - code: NotRestored
+        definition: 'site has not been restored'
+      - code: Restored
+        definition: 'site received active restoration'
+  - attribute:
+      attributeName: water
+      levels:
+      - code: Ephemeral
+        definition: 'water in channel intermittently'
+      - code: Perennial
+        definition: 'water in channel continuously'

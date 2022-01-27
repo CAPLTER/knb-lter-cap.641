@@ -1,0 +1,22 @@
+|
+  site_code:
+    attributeName: site_code
+    attributeDefinition: 'survey location identifier'
+    columnClasses: character
+    definition: ''
+  reach:
+    attributeName: reach
+    attributeDefinition: 'sampling location along the Salt River'
+    columnClasses: factor
+  urbanized:
+    attributeName: urbanized
+    attributeDefinition: 'boolean indicator denoting if the location is in an urban or non-urban setting'
+    columnClasses: factor
+  restored:
+    attributeName: restored
+    attributeDefinition: 'boolean indicator denoting if the site was the focus of active restoration through plantings or seeding (or has not received treatment)'
+    columnClasses: factor
+  water:
+    attributeName: water
+    attributeDefinition: 'boolean indicator denoting if the presence of water is perennial or ephemeral'
+    columnClasses: factor

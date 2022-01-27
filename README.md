@@ -20,6 +20,23 @@ datasheet, nor on an earlier one revised in 2004. Given that the meaning of
 "flying" is not clear nor particularly additive, those data are not included in
 the published data.
 
+### knb-lter-cap.641.7 _2022-01-27_
+
+This version reflects the first to be based on the new database migrated from
+MySQL::lter34birds to postgresql::core_birds. Data quality and structure were
+greatly improved as part of the migration, which translated into reduced and
+more efficient code at this publishing step. Except for the river reach
+component, the structure was organized to mirror the details (names,
+orgization, etc.) of the core birds data (knb-lter-cap.46).
+
+- unfortunately, even at this time, spring 2019 are still the most recently
+  QC'd data
+- core_birds that had reflected both survey details and bird observations was
+  split into separate bird_observations and bird_surveys data tables
+- additional_bird_observations was merged as a single field into bird_surveys
+* data limited to most recently QC'd set: 2019-05-03
+
+
 ### knb-lter-cap.641.6 _2020-09-29_
 
 This version is primarily a data refresh to correct an error identified by S.

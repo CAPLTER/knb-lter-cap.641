@@ -1,0 +1,6 @@
+|
+  reach:
+    attributeName: reach
+    attributeDefinition: 'sampling location along the Salt River'
+    columnClasses: character
+    definition: ''

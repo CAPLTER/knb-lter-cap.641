@@ -1,0 +1,74 @@
+|
+  survey_id:
+    attributeName: survey_id
+    attributeDefinition: 'bird survey unique identifier'
+    columnClasses: character
+    definition: ''
+  reach:
+    attributeName: reach
+    attributeDefinition: 'sampling location along the Salt River'
+    columnClasses: factor
+  site_code:
+    attributeName: site_code
+    attributeDefinition: 'survey location identifier'
+    columnClasses: character
+    definition: ''
+  survey_date:
+    attributeName: survey_date
+    attributeDefinition: 'survey date'
+    columnClasses: Date
+    formatString: YYYY-MM-DD
+  time_start:
+    attributeName: time_start
+    attributeDefinition: 'survey start time'
+    columnClasses: Date
+    formatString: hh:mm:ss
+  time_end:
+    attributeName: time_end
+    attributeDefinition: 'survey end time'
+    columnClasses: Date
+    formatString: hh:mm:ss
+  observer:
+    attributeName: observer
+    attributeDefinition: 'truncated name of bird surveyor'
+    columnClasses: character
+    definition: ''
+  wind:
+    attributeName: wind
+    attributeDefinition: 'qualitative assessment of wind speed during the survey (not recorded prior to 2004-10-02)'
+    columnClasses: factor
+  precipitation:
+    attributeName: precipitation
+    attributeDefinition: 'qualitative assessment of precipitation during the survey (not recorded prior to 2004-10-02)'
+    columnClasses: factor
+  disturbances:
+    attributeName: disturbances
+    attributeDefinition: 'indication of a disturbance to the surveyor at the survey location during the survey'
+    columnClasses: factor
+  sight_obstruct:
+    attributeName: sight_obstruct
+    attributeDefinition: 'per cent of the view obstructed during the survey (not recorded prior to 2004-10-02)'
+    unit: 'percent'
+    numberType: whole
+    minimum: 0
+    maximum: 100
+    columnClasses: numeric
+  noise_level:
+    attributeName: noise_level
+    attributeDefinition: 'qualitative assessment of noise level during the survey (not recorded prior to 2004-10-02)'
+    columnClasses: factor
+  site_condition:
+    attributeName: site_condition
+    attributeDefinition: 'notes regarding the condition of the survey location'
+    columnClasses: character
+    definition: ''
+  non_bird_species:
+    attributeName: non_bird_species
+    attributeDefinition: 'notes regarding non-bird fauna observed during the survey'
+    columnClasses: character
+    definition: ''
+  additional_bird_observations:
+    attributeName: additional_bird_observations
+    attributeDefinition: 'additional bird species observed using the habitat but not recorded during the survey window'
+    columnClasses: character
+    definition: ''
