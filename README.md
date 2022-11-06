@@ -20,6 +20,12 @@ datasheet, nor on an earlier one revised in 2004. Given that the meaning of
 "flying" is not clear nor particularly additive, those data are not included in
 the published data.
 
+### knb-lter-cap.641.8 _2022-11-06_
+
+- data refresh
+- workflow adjusted to accommodate new workflow in capeml where datatables are
+  called from yaml.
+
 ### knb-lter-cap.641.7 _2022-01-27_
 
 This version reflects the first to be based on the new database migrated from

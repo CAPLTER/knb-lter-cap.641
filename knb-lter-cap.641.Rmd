@@ -159,14 +159,6 @@ try({
   capeml::write_factors(bird_observations, overwrite = FALSE)
 })
 
-# bird_observations_desc <- "bird survey sampling details (site, date, time, observer) and birds observed during the survey windows (type, number, distance from observer, behavior)"
-# 
-# bird_observations_DT <- capeml::create_dataTable(
-#   dfname         = bird_observations,
-#   description    = bird_observations_desc,
-#   dateRangeField = "survey_date"
-# )
-
 ```
 
 # bird surveys
@@ -325,14 +317,6 @@ try({
   capeml::write_factors(bird_surveys, overwrite = FALSE)
 })
 
-# bird_surveys_desc <- "bird survey sampling details including survey location, date, times, observer, conditions at the site during the survey, and birds and other animals observed at the survey site but outside the designated survey window"
-# 
-# bird_surveys_DT <- capeml::create_dataTable(
-#   dfname         = bird_surveys,
-#   description    = bird_surveys_desc,
-#   dateRangeField = "survey_date"
-# )
-
 ```
 
 There is not enough detail concerning the SRBP sites in the lter34.sites table
@@ -392,11 +376,6 @@ try({
   capeml::write_attributes(reach_characteristics, overwrite = FALSE)
   capeml::write_factors(reach_characteristics, overwrite = FALSE)
 })
-
-# srbp_reach_characteristics_DT <- capeml::create_dataTable(
-#   dfname      = reach_characteristics,
-#   description = reach_characteristics_desc
-# )
 
 ```
 
