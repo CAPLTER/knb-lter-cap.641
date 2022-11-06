@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<eml:eml xmlns:eml="https://eml.ecoinformatics.org/eml-2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:stmml="http://www.xml-cml.org/schema/stmml-1.2" packageId="ffb716a6-a5fe-48a8-b975-e2edef7bc496" system="uuid" xsi:schemaLocation="https://eml.ecoinformatics.org/eml-2.2.0 https://eml.ecoinformatics.org/eml-2.2.0/eml.xsd">
+<eml:eml xmlns:eml="https://eml.ecoinformatics.org/eml-2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:stmml="http://www.xml-cml.org/schema/stmml-1.2" packageId="87bce483-a135-4270-be04-c292b13394ac" system="uuid" xsi:schemaLocation="https://eml.ecoinformatics.org/eml-2.2.0 https://eml.ecoinformatics.org/eml-2.2.0/eml.xsd">
   <taxonomicClassification>
     <taxonRankName>kingdom</taxonRankName>
     <taxonRankValue>Animalia</taxonRankValue>
@@ -470,13 +470,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Melozone</taxonRankValue>
@@ -1103,13 +1101,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Melospiza</taxonRankValue>
@@ -2171,20 +2167,15 @@
                       <commonName>Swans</commonName>
                       <taxonId provider="https://itis.gov">174983</taxonId>
                       <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anserinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714008</taxonId>
+                        <taxonRankName>genus</taxonRankName>
+                        <taxonRankValue>Branta</taxonRankValue>
+                        <commonName>Brent Geese</commonName>
+                        <taxonId provider="https://itis.gov">174998</taxonId>
                         <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Branta</taxonRankValue>
-                          <commonName>Brent Geese</commonName>
-                          <taxonId provider="https://itis.gov">174998</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Branta canadensis</taxonRankValue>
-                            <commonName>Canada Goose</commonName>
-                            <taxonId provider="https://itis.gov">174999</taxonId>
-                          </taxonomicClassification>
+                          <taxonRankName>species</taxonRankName>
+                          <taxonRankValue>Branta canadensis</taxonRankValue>
+                          <commonName>Canada Goose</commonName>
+                          <taxonId provider="https://itis.gov">174999</taxonId>
                         </taxonomicClassification>
                       </taxonomicClassification>
                     </taxonomicClassification>
@@ -2449,6 +2440,9 @@
                   <taxonomicClassification>
                     <taxonRankName>order</taxonRankName>
                     <taxonRankValue>Coraciiformes</taxonRankValue>
+                    <commonName>Motmots</commonName>
+                    <commonName>Bee-eaters</commonName>
+                    <commonName>Todies</commonName>
                     <commonName>Kingfishers</commonName>
                     <commonName>Rollers</commonName>
                     <taxonId provider="https://itis.gov">178102</taxonId>
@@ -2536,20 +2530,15 @@
                       <commonName>Swans</commonName>
                       <taxonId provider="https://itis.gov">174983</taxonId>
                       <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anatinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714011</taxonId>
+                        <taxonRankName>genus</taxonRankName>
+                        <taxonRankValue>Anas</taxonRankValue>
+                        <commonName>Dabbling Ducks</commonName>
+                        <taxonId provider="https://itis.gov">175062</taxonId>
                         <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Anas</taxonRankValue>
-                          <commonName>Dabbling Ducks</commonName>
-                          <taxonId provider="https://itis.gov">175062</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Anas platyrhynchos</taxonRankValue>
-                            <commonName>Mallard</commonName>
-                            <taxonId provider="https://itis.gov">175063</taxonId>
-                          </taxonomicClassification>
+                          <taxonRankName>species</taxonRankName>
+                          <taxonRankValue>Anas platyrhynchos</taxonRankValue>
+                          <commonName>Mallard</commonName>
+                          <taxonId provider="https://itis.gov">175063</taxonId>
                         </taxonomicClassification>
                       </taxonomicClassification>
                     </taxonomicClassification>
@@ -2680,13 +2669,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Zonotrichia</taxonRankValue>
@@ -4048,83 +4035,10 @@
     </taxonomicClassification>
   </taxonomicClassification>
   <taxonomicClassification>
-    <taxonRankName>kingdom</taxonRankName>
-    <taxonRankValue>Animalia</taxonRankValue>
-    <commonName>animals</commonName>
-    <taxonId provider="https://itis.gov">202423</taxonId>
-    <taxonomicClassification>
-      <taxonRankName>subkingdom</taxonRankName>
-      <taxonRankValue>Bilateria</taxonRankValue>
-      <taxonId provider="https://itis.gov">914154</taxonId>
-      <taxonomicClassification>
-        <taxonRankName>infrakingdom</taxonRankName>
-        <taxonRankValue>Deuterostomia</taxonRankValue>
-        <taxonId provider="https://itis.gov">914156</taxonId>
-        <taxonomicClassification>
-          <taxonRankName>phylum</taxonRankName>
-          <taxonRankValue>Chordata</taxonRankValue>
-          <commonName>chordates</commonName>
-          <taxonId provider="https://itis.gov">158852</taxonId>
-          <taxonomicClassification>
-            <taxonRankName>subphylum</taxonRankName>
-            <taxonRankValue>Vertebrata</taxonRankValue>
-            <commonName>vertebrates</commonName>
-            <taxonId provider="https://itis.gov">331030</taxonId>
-            <taxonomicClassification>
-              <taxonRankName>infraphylum</taxonRankName>
-              <taxonRankValue>Gnathostomata</taxonRankValue>
-              <taxonId provider="https://itis.gov">914179</taxonId>
-              <taxonomicClassification>
-                <taxonRankName>superclass</taxonRankName>
-                <taxonRankValue>Tetrapoda</taxonRankValue>
-                <taxonId provider="https://itis.gov">914181</taxonId>
-                <taxonomicClassification>
-                  <taxonRankName>class</taxonRankName>
-                  <taxonRankValue>Aves</taxonRankValue>
-                  <commonName>Birds</commonName>
-                  <taxonId provider="https://itis.gov">174371</taxonId>
-                  <taxonomicClassification>
-                    <taxonRankName>order</taxonRankName>
-                    <taxonRankValue>Anseriformes</taxonRankValue>
-                    <commonName>Ducks</commonName>
-                    <commonName>Geese</commonName>
-                    <commonName>Screamers</commonName>
-                    <commonName>Swans</commonName>
-                    <commonName>Waterfowl</commonName>
-                    <taxonId provider="https://itis.gov">174982</taxonId>
-                    <taxonomicClassification>
-                      <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Anatidae</taxonRankValue>
-                      <commonName>Ducks</commonName>
-                      <commonName>Geese</commonName>
-                      <commonName>Swans</commonName>
-                      <taxonId provider="https://itis.gov">174983</taxonId>
-                      <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anatinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714011</taxonId>
-                        <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Anas</taxonRankValue>
-                          <commonName>Dabbling Ducks</commonName>
-                          <taxonId provider="https://itis.gov">175062</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Anas clypeata</taxonRankValue>
-                            <commonName>Northern Shoveler</commonName>
-                            <taxonId provider="https://itis.gov">175096</taxonId>
-                          </taxonomicClassification>
-                        </taxonomicClassification>
-                      </taxonomicClassification>
-                    </taxonomicClassification>
-                  </taxonomicClassification>
-                </taxonomicClassification>
-              </taxonomicClassification>
-            </taxonomicClassification>
-          </taxonomicClassification>
-        </taxonomicClassification>
-      </taxonomicClassification>
-    </taxonomicClassification>
+    <taxonRankName>species</taxonRankName>
+    <taxonRankValue>Anas clypeata</taxonRankValue>
+    <commonName>Northern Shoveler</commonName>
+    <taxonId provider="https://itis.gov">175096</taxonId>
   </taxonomicClassification>
   <taxonomicClassification>
     <taxonRankName>kingdom</taxonRankName>
@@ -4179,21 +4093,17 @@
                       <commonName>Swans</commonName>
                       <taxonId provider="https://itis.gov">174983</taxonId>
                       <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anatinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714011</taxonId>
+                        <taxonRankName>genus</taxonRankName>
+                        <taxonRankValue>Anas</taxonRankValue>
+                        <commonName>Dabbling Ducks</commonName>
+                        <taxonId provider="https://itis.gov">175062</taxonId>
                         <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Anas</taxonRankValue>
-                          <commonName>Dabbling Ducks</commonName>
-                          <taxonId provider="https://itis.gov">175062</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Anas crecca</taxonRankValue>
-                            <commonName>Eurasian Teal</commonName>
-                            <commonName>Green-winged Teal</commonName>
-                            <taxonId provider="https://itis.gov">175081</taxonId>
-                          </taxonomicClassification>
+                          <taxonRankName>species</taxonRankName>
+                          <taxonRankValue>Anas crecca</taxonRankValue>
+                          <commonName>Eurasian Teal</commonName>
+                          <commonName>Green-winged Teal</commonName>
+                          <commonName>Common Teal</commonName>
+                          <taxonId provider="https://itis.gov">175081</taxonId>
                         </taxonomicClassification>
                       </taxonomicClassification>
                     </taxonomicClassification>
@@ -4976,13 +4886,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Pipilo</taxonRankValue>
@@ -5048,13 +4956,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Spizella</taxonRankValue>
@@ -5675,13 +5581,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Chondestes</taxonRankValue>
@@ -6547,83 +6451,10 @@
     </taxonomicClassification>
   </taxonomicClassification>
   <taxonomicClassification>
-    <taxonRankName>kingdom</taxonRankName>
-    <taxonRankValue>Animalia</taxonRankValue>
-    <commonName>animals</commonName>
-    <taxonId provider="https://itis.gov">202423</taxonId>
-    <taxonomicClassification>
-      <taxonRankName>subkingdom</taxonRankName>
-      <taxonRankValue>Bilateria</taxonRankValue>
-      <taxonId provider="https://itis.gov">914154</taxonId>
-      <taxonomicClassification>
-        <taxonRankName>infrakingdom</taxonRankName>
-        <taxonRankValue>Deuterostomia</taxonRankValue>
-        <taxonId provider="https://itis.gov">914156</taxonId>
-        <taxonomicClassification>
-          <taxonRankName>phylum</taxonRankName>
-          <taxonRankValue>Chordata</taxonRankValue>
-          <commonName>chordates</commonName>
-          <taxonId provider="https://itis.gov">158852</taxonId>
-          <taxonomicClassification>
-            <taxonRankName>subphylum</taxonRankName>
-            <taxonRankValue>Vertebrata</taxonRankValue>
-            <commonName>vertebrates</commonName>
-            <taxonId provider="https://itis.gov">331030</taxonId>
-            <taxonomicClassification>
-              <taxonRankName>infraphylum</taxonRankName>
-              <taxonRankValue>Gnathostomata</taxonRankValue>
-              <taxonId provider="https://itis.gov">914179</taxonId>
-              <taxonomicClassification>
-                <taxonRankName>superclass</taxonRankName>
-                <taxonRankValue>Tetrapoda</taxonRankValue>
-                <taxonId provider="https://itis.gov">914181</taxonId>
-                <taxonomicClassification>
-                  <taxonRankName>class</taxonRankName>
-                  <taxonRankValue>Aves</taxonRankValue>
-                  <commonName>Birds</commonName>
-                  <taxonId provider="https://itis.gov">174371</taxonId>
-                  <taxonomicClassification>
-                    <taxonRankName>order</taxonRankName>
-                    <taxonRankValue>Anseriformes</taxonRankValue>
-                    <commonName>Ducks</commonName>
-                    <commonName>Geese</commonName>
-                    <commonName>Screamers</commonName>
-                    <commonName>Swans</commonName>
-                    <commonName>Waterfowl</commonName>
-                    <taxonId provider="https://itis.gov">174982</taxonId>
-                    <taxonomicClassification>
-                      <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Anatidae</taxonRankValue>
-                      <commonName>Ducks</commonName>
-                      <commonName>Geese</commonName>
-                      <commonName>Swans</commonName>
-                      <taxonId provider="https://itis.gov">174983</taxonId>
-                      <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anatinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714011</taxonId>
-                        <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Anas</taxonRankValue>
-                          <commonName>Dabbling Ducks</commonName>
-                          <taxonId provider="https://itis.gov">175062</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Anas strepera</taxonRankValue>
-                            <commonName>Gadwall</commonName>
-                            <taxonId provider="https://itis.gov">175073</taxonId>
-                          </taxonomicClassification>
-                        </taxonomicClassification>
-                      </taxonomicClassification>
-                    </taxonomicClassification>
-                  </taxonomicClassification>
-                </taxonomicClassification>
-              </taxonomicClassification>
-            </taxonomicClassification>
-          </taxonomicClassification>
-        </taxonomicClassification>
-      </taxonomicClassification>
-    </taxonomicClassification>
+    <taxonRankName>species</taxonRankName>
+    <taxonRankValue>Anas strepera</taxonRankValue>
+    <commonName>Gadwall</commonName>
+    <taxonId provider="https://itis.gov">175073</taxonId>
   </taxonomicClassification>
   <taxonomicClassification>
     <taxonRankName>kingdom</taxonRankName>
@@ -6812,13 +6643,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Melospiza</taxonRankValue>
@@ -6954,13 +6783,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Amphispiza</taxonRankValue>
@@ -7243,13 +7070,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Spizella</taxonRankValue>
@@ -7725,13 +7550,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Spizella</taxonRankValue>
@@ -7755,83 +7578,10 @@
     </taxonomicClassification>
   </taxonomicClassification>
   <taxonomicClassification>
-    <taxonRankName>kingdom</taxonRankName>
-    <taxonRankValue>Animalia</taxonRankValue>
-    <commonName>animals</commonName>
-    <taxonId provider="https://itis.gov">202423</taxonId>
-    <taxonomicClassification>
-      <taxonRankName>subkingdom</taxonRankName>
-      <taxonRankValue>Bilateria</taxonRankValue>
-      <taxonId provider="https://itis.gov">914154</taxonId>
-      <taxonomicClassification>
-        <taxonRankName>infrakingdom</taxonRankName>
-        <taxonRankValue>Deuterostomia</taxonRankValue>
-        <taxonId provider="https://itis.gov">914156</taxonId>
-        <taxonomicClassification>
-          <taxonRankName>phylum</taxonRankName>
-          <taxonRankValue>Chordata</taxonRankValue>
-          <commonName>chordates</commonName>
-          <taxonId provider="https://itis.gov">158852</taxonId>
-          <taxonomicClassification>
-            <taxonRankName>subphylum</taxonRankName>
-            <taxonRankValue>Vertebrata</taxonRankValue>
-            <commonName>vertebrates</commonName>
-            <taxonId provider="https://itis.gov">331030</taxonId>
-            <taxonomicClassification>
-              <taxonRankName>infraphylum</taxonRankName>
-              <taxonRankValue>Gnathostomata</taxonRankValue>
-              <taxonId provider="https://itis.gov">914179</taxonId>
-              <taxonomicClassification>
-                <taxonRankName>superclass</taxonRankName>
-                <taxonRankValue>Tetrapoda</taxonRankValue>
-                <taxonId provider="https://itis.gov">914181</taxonId>
-                <taxonomicClassification>
-                  <taxonRankName>class</taxonRankName>
-                  <taxonRankValue>Aves</taxonRankValue>
-                  <commonName>Birds</commonName>
-                  <taxonId provider="https://itis.gov">174371</taxonId>
-                  <taxonomicClassification>
-                    <taxonRankName>order</taxonRankName>
-                    <taxonRankValue>Anseriformes</taxonRankValue>
-                    <commonName>Ducks</commonName>
-                    <commonName>Geese</commonName>
-                    <commonName>Screamers</commonName>
-                    <commonName>Swans</commonName>
-                    <commonName>Waterfowl</commonName>
-                    <taxonId provider="https://itis.gov">174982</taxonId>
-                    <taxonomicClassification>
-                      <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Anatidae</taxonRankValue>
-                      <commonName>Ducks</commonName>
-                      <commonName>Geese</commonName>
-                      <commonName>Swans</commonName>
-                      <taxonId provider="https://itis.gov">174983</taxonId>
-                      <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anatinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714011</taxonId>
-                        <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Anas</taxonRankValue>
-                          <commonName>Dabbling Ducks</commonName>
-                          <taxonId provider="https://itis.gov">175062</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Anas cyanoptera</taxonRankValue>
-                            <commonName>Cinnamon Teal</commonName>
-                            <taxonId provider="https://itis.gov">175089</taxonId>
-                          </taxonomicClassification>
-                        </taxonomicClassification>
-                      </taxonomicClassification>
-                    </taxonomicClassification>
-                  </taxonomicClassification>
-                </taxonomicClassification>
-              </taxonomicClassification>
-            </taxonomicClassification>
-          </taxonomicClassification>
-        </taxonomicClassification>
-      </taxonomicClassification>
-    </taxonomicClassification>
+    <taxonRankName>species</taxonRankName>
+    <taxonRankValue>Anas cyanoptera</taxonRankValue>
+    <commonName>Cinnamon Teal</commonName>
+    <taxonId provider="https://itis.gov">175089</taxonId>
   </taxonomicClassification>
   <taxonomicClassification>
     <taxonRankName>kingdom</taxonRankName>
@@ -7943,13 +7693,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Calamospiza</taxonRankValue>
@@ -8015,13 +7763,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Passerculus</taxonRankValue>
@@ -8372,13 +8118,11 @@
                     <taxonId provider="https://itis.gov">178265</taxonId>
                     <taxonomicClassification>
                       <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Emberizidae</taxonRankValue>
-                      <commonName>Emberizid Finches</commonName>
-                      <commonName>American Sparrows</commonName>
-                      <commonName>Towhees</commonName>
-                      <commonName>Buntings</commonName>
-                      <commonName>New World Sparrows</commonName>
-                      <taxonId provider="https://itis.gov">178838</taxonId>
+                      <taxonRankValue>Passerellidae</taxonRankValue>
+                      <commonName>New World sparrows</commonName>
+                      <commonName>American sparrows</commonName>
+                      <commonName>towhees</commonName>
+                      <taxonId provider="https://itis.gov">1189744</taxonId>
                       <taxonomicClassification>
                         <taxonRankName>genus</taxonRankName>
                         <taxonRankValue>Pipilo</taxonRankValue>
@@ -8664,20 +8408,16 @@
                       <commonName>Swans</commonName>
                       <taxonId provider="https://itis.gov">174983</taxonId>
                       <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anatinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714011</taxonId>
+                        <taxonRankName>genus</taxonRankName>
+                        <taxonRankValue>Mergus</taxonRankValue>
+                        <commonName>Greater Mergansers</commonName>
+                        <taxonId provider="https://itis.gov">175184</taxonId>
                         <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Mergus</taxonRankValue>
-                          <commonName>Greater Mergansers</commonName>
-                          <taxonId provider="https://itis.gov">175184</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Mergus merganser</taxonRankValue>
-                            <commonName>Common Merganser</commonName>
-                            <taxonId provider="https://itis.gov">175185</taxonId>
-                          </taxonomicClassification>
+                          <taxonRankName>species</taxonRankName>
+                          <taxonRankValue>Mergus merganser</taxonRankValue>
+                          <commonName>Common Merganser</commonName>
+                          <commonName>Goosander</commonName>
+                          <taxonId provider="https://itis.gov">175185</taxonId>
                         </taxonomicClassification>
                       </taxonomicClassification>
                     </taxonomicClassification>
@@ -9486,84 +9226,11 @@
     </taxonomicClassification>
   </taxonomicClassification>
   <taxonomicClassification>
-    <taxonRankName>kingdom</taxonRankName>
-    <taxonRankValue>Animalia</taxonRankValue>
-    <commonName>animals</commonName>
-    <taxonId provider="https://itis.gov">202423</taxonId>
-    <taxonomicClassification>
-      <taxonRankName>subkingdom</taxonRankName>
-      <taxonRankValue>Bilateria</taxonRankValue>
-      <taxonId provider="https://itis.gov">914154</taxonId>
-      <taxonomicClassification>
-        <taxonRankName>infrakingdom</taxonRankName>
-        <taxonRankValue>Deuterostomia</taxonRankValue>
-        <taxonId provider="https://itis.gov">914156</taxonId>
-        <taxonomicClassification>
-          <taxonRankName>phylum</taxonRankName>
-          <taxonRankValue>Chordata</taxonRankValue>
-          <commonName>chordates</commonName>
-          <taxonId provider="https://itis.gov">158852</taxonId>
-          <taxonomicClassification>
-            <taxonRankName>subphylum</taxonRankName>
-            <taxonRankValue>Vertebrata</taxonRankValue>
-            <commonName>vertebrates</commonName>
-            <taxonId provider="https://itis.gov">331030</taxonId>
-            <taxonomicClassification>
-              <taxonRankName>infraphylum</taxonRankName>
-              <taxonRankValue>Gnathostomata</taxonRankValue>
-              <taxonId provider="https://itis.gov">914179</taxonId>
-              <taxonomicClassification>
-                <taxonRankName>superclass</taxonRankName>
-                <taxonRankValue>Tetrapoda</taxonRankValue>
-                <taxonId provider="https://itis.gov">914181</taxonId>
-                <taxonomicClassification>
-                  <taxonRankName>class</taxonRankName>
-                  <taxonRankValue>Aves</taxonRankValue>
-                  <commonName>Birds</commonName>
-                  <taxonId provider="https://itis.gov">174371</taxonId>
-                  <taxonomicClassification>
-                    <taxonRankName>order</taxonRankName>
-                    <taxonRankValue>Anseriformes</taxonRankValue>
-                    <commonName>Ducks</commonName>
-                    <commonName>Geese</commonName>
-                    <commonName>Screamers</commonName>
-                    <commonName>Swans</commonName>
-                    <commonName>Waterfowl</commonName>
-                    <taxonId provider="https://itis.gov">174982</taxonId>
-                    <taxonomicClassification>
-                      <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Anatidae</taxonRankValue>
-                      <commonName>Ducks</commonName>
-                      <commonName>Geese</commonName>
-                      <commonName>Swans</commonName>
-                      <taxonId provider="https://itis.gov">174983</taxonId>
-                      <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anserinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714008</taxonId>
-                        <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Chen</taxonRankValue>
-                          <commonName>Snow Geese</commonName>
-                          <taxonId provider="https://itis.gov">175037</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Chen caerulescens</taxonRankValue>
-                            <commonName>Blue Goose</commonName>
-                            <commonName>Snow Goose</commonName>
-                            <taxonId provider="https://itis.gov">175038</taxonId>
-                          </taxonomicClassification>
-                        </taxonomicClassification>
-                      </taxonomicClassification>
-                    </taxonomicClassification>
-                  </taxonomicClassification>
-                </taxonomicClassification>
-              </taxonomicClassification>
-            </taxonomicClassification>
-          </taxonomicClassification>
-        </taxonomicClassification>
-      </taxonomicClassification>
-    </taxonomicClassification>
+    <taxonRankName>species</taxonRankName>
+    <taxonRankValue>Chen caerulescens</taxonRankValue>
+    <commonName>Blue Goose</commonName>
+    <commonName>Snow Goose</commonName>
+    <taxonId provider="https://itis.gov">175038</taxonId>
   </taxonomicClassification>
   <taxonomicClassification>
     <taxonRankName>kingdom</taxonRankName>
@@ -10009,83 +9676,10 @@
     </taxonomicClassification>
   </taxonomicClassification>
   <taxonomicClassification>
-    <taxonRankName>kingdom</taxonRankName>
-    <taxonRankValue>Animalia</taxonRankValue>
-    <commonName>animals</commonName>
-    <taxonId provider="https://itis.gov">202423</taxonId>
-    <taxonomicClassification>
-      <taxonRankName>subkingdom</taxonRankName>
-      <taxonRankValue>Bilateria</taxonRankValue>
-      <taxonId provider="https://itis.gov">914154</taxonId>
-      <taxonomicClassification>
-        <taxonRankName>infrakingdom</taxonRankName>
-        <taxonRankValue>Deuterostomia</taxonRankValue>
-        <taxonId provider="https://itis.gov">914156</taxonId>
-        <taxonomicClassification>
-          <taxonRankName>phylum</taxonRankName>
-          <taxonRankValue>Chordata</taxonRankValue>
-          <commonName>chordates</commonName>
-          <taxonId provider="https://itis.gov">158852</taxonId>
-          <taxonomicClassification>
-            <taxonRankName>subphylum</taxonRankName>
-            <taxonRankValue>Vertebrata</taxonRankValue>
-            <commonName>vertebrates</commonName>
-            <taxonId provider="https://itis.gov">331030</taxonId>
-            <taxonomicClassification>
-              <taxonRankName>infraphylum</taxonRankName>
-              <taxonRankValue>Gnathostomata</taxonRankValue>
-              <taxonId provider="https://itis.gov">914179</taxonId>
-              <taxonomicClassification>
-                <taxonRankName>superclass</taxonRankName>
-                <taxonRankValue>Tetrapoda</taxonRankValue>
-                <taxonId provider="https://itis.gov">914181</taxonId>
-                <taxonomicClassification>
-                  <taxonRankName>class</taxonRankName>
-                  <taxonRankValue>Aves</taxonRankValue>
-                  <commonName>Birds</commonName>
-                  <taxonId provider="https://itis.gov">174371</taxonId>
-                  <taxonomicClassification>
-                    <taxonRankName>order</taxonRankName>
-                    <taxonRankValue>Anseriformes</taxonRankValue>
-                    <commonName>Ducks</commonName>
-                    <commonName>Geese</commonName>
-                    <commonName>Screamers</commonName>
-                    <commonName>Swans</commonName>
-                    <commonName>Waterfowl</commonName>
-                    <taxonId provider="https://itis.gov">174982</taxonId>
-                    <taxonomicClassification>
-                      <taxonRankName>family</taxonRankName>
-                      <taxonRankValue>Anatidae</taxonRankValue>
-                      <commonName>Ducks</commonName>
-                      <commonName>Geese</commonName>
-                      <commonName>Swans</commonName>
-                      <taxonId provider="https://itis.gov">174983</taxonId>
-                      <taxonomicClassification>
-                        <taxonRankName>subfamily</taxonRankName>
-                        <taxonRankValue>Anatinae</taxonRankValue>
-                        <taxonId provider="https://itis.gov">714011</taxonId>
-                        <taxonomicClassification>
-                          <taxonRankName>genus</taxonRankName>
-                          <taxonRankValue>Anas</taxonRankValue>
-                          <commonName>Dabbling Ducks</commonName>
-                          <taxonId provider="https://itis.gov">175062</taxonId>
-                          <taxonomicClassification>
-                            <taxonRankName>species</taxonRankName>
-                            <taxonRankValue>Anas americana</taxonRankValue>
-                            <commonName>American Wigeon</commonName>
-                            <taxonId provider="https://itis.gov">175094</taxonId>
-                          </taxonomicClassification>
-                        </taxonomicClassification>
-                      </taxonomicClassification>
-                    </taxonomicClassification>
-                  </taxonomicClassification>
-                </taxonomicClassification>
-              </taxonomicClassification>
-            </taxonomicClassification>
-          </taxonomicClassification>
-        </taxonomicClassification>
-      </taxonomicClassification>
-    </taxonomicClassification>
+    <taxonRankName>species</taxonRankName>
+    <taxonRankValue>Anas americana</taxonRankValue>
+    <commonName>American Wigeon</commonName>
+    <taxonId provider="https://itis.gov">175094</taxonId>
   </taxonomicClassification>
   <taxonomicClassification>
     <taxonRankName>kingdom</taxonRankName>

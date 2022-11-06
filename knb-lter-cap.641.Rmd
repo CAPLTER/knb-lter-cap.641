@@ -159,13 +159,13 @@ try({
   capeml::write_factors(bird_observations, overwrite = FALSE)
 })
 
-bird_observations_desc <- "bird survey sampling details (site, date, time, observer) and birds observed during the survey windows (type, number, distance from observer, behavior)"
-
-bird_observations_DT <- capeml::create_dataTable(
-  dfname         = bird_observations,
-  description    = bird_observations_desc,
-  dateRangeField = "survey_date"
-)
+# bird_observations_desc <- "bird survey sampling details (site, date, time, observer) and birds observed during the survey windows (type, number, distance from observer, behavior)"
+# 
+# bird_observations_DT <- capeml::create_dataTable(
+#   dfname         = bird_observations,
+#   description    = bird_observations_desc,
+#   dateRangeField = "survey_date"
+# )
 
 ```
 
@@ -325,13 +325,13 @@ try({
   capeml::write_factors(bird_surveys, overwrite = FALSE)
 })
 
-bird_surveys_desc <- "bird survey sampling details including survey location, date, times, observer, conditions at the site during the survey, and birds and other animals observed at the survey site but outside the designated survey window"
-
-bird_surveys_DT <- capeml::create_dataTable(
-  dfname         = bird_surveys,
-  description    = bird_surveys_desc,
-  dateRangeField = "survey_date"
-)
+# bird_surveys_desc <- "bird survey sampling details including survey location, date, times, observer, conditions at the site during the survey, and birds and other animals observed at the survey site but outside the designated survey window"
+# 
+# bird_surveys_DT <- capeml::create_dataTable(
+#   dfname         = bird_surveys,
+#   description    = bird_surveys_desc,
+#   dateRangeField = "survey_date"
+# )
 
 ```
 
@@ -386,17 +386,17 @@ reach_characteristics <- dplyr::inner_join(
 
 ```{r reach-characteristics-table}
 
-reach_characteristics_desc <- "Salt River reach location of each sampling site and general characteristics of that portion of the river where sampling is conducted"
+# reach_characteristics_desc <- "Salt River reach location of each sampling site and general characteristics of that portion of the river where sampling is conducted"
 
 try({
   capeml::write_attributes(reach_characteristics, overwrite = FALSE)
   capeml::write_factors(reach_characteristics, overwrite = FALSE)
 })
 
-srbp_reach_characteristics_DT <- capeml::create_dataTable(
-  dfname      = reach_characteristics,
-  description = reach_characteristics_desc
-)
+# srbp_reach_characteristics_DT <- capeml::create_dataTable(
+#   dfname      = reach_characteristics,
+#   description = reach_characteristics_desc
+# )
 
 ```
 
@@ -521,7 +521,7 @@ metadataProvider <- list(sally, stevan)
 
 begindate <- as.character(min(bird_surveys$survey_date))
 enddate   <- as.character(max(bird_surveys$survey_date))
-geo_desc  <- yaml::yaml.load_file("config.yaml")$geographicCoverage$geographicDescription
+geo_desc  <- yaml::yaml.load_file("config.yaml")$geographic_description
 
 coverage <- EML::set_coverage(
   begin                 = begindate,
@@ -599,14 +599,21 @@ capeml::write_cap_eml()
 if (!file.exists("config.yaml")) {
   stop("config.yaml not found")
 }
-packageIdent <- yaml::yaml.load_file("config.yaml")$packageIdent
-packageNum   <- yaml::yaml.load_file("config.yaml")$packageNum
+package_configs <- capeml::read_package_configuration()
+identifier      <- package_configs$identifier
+scope           <- package_configs$scope
+
+version <- capeml::get_next_version(
+  provided_scope      = scope,
+  provided_identifier = identifier
+)
+
 ```
 
 ```{r preview_data_file_to_upload}
 
 # preview data set files that will be uploaded to S3
-list.files(pattern = paste0(packageNum, "_"))
+(data_files_to_upload <- list.files(pattern = "^641_"))
 ```
 
 Move data and final xml files to respective ASU locations.
@@ -621,25 +628,7 @@ source("~/Documents/localSettings/aws.s3")
 ```{r upload_data_S3}
 
 # upload files to S3
-lapply(list.files(pattern = paste0(packageNum, "_")), gioseml::data_to_amz)
-```
-
-```{r clean_up}
-
-# remove data files
-dataFilesToRemove <- dir(pattern = paste0(packageNum, "_"))
-file.remove(dataFilesToRemove)
-
-# EML to S3
-gioseml::eml_to_amz(list.files(pattern = "^knb.*xml"))
-
-# EML to cap-data-eml and remove file from project
-file.copy(
-  list.files(pattern = "^knb.*xml"),
-  "/home/srearl/localRepos/cap-metadata/cap-data-eml/"
-)
-file.remove(list.files(pattern = "^knb.*xml"))
-
+lapply(data_files_to_upload, gioseml::data_to_amz)
 ```
 
 # EDI
@@ -649,8 +638,8 @@ file.remove(list.files(pattern = "^knb.*xml"))
 ```{r edi-login, eval=TRUE, echo=TRUE, message=TRUE}
 
 EDIutils::login(
-  userId   = keyring::key_get("edi_user"),
-  userPass = keyring::key_get("edi_pass")
+  userId   = keyring::key_get("edi_user", keyring = "edi"),
+  userPass = keyring::key_get("edi_pass", keyring = "edi")
 )
 
 ```
@@ -660,12 +649,12 @@ EDIutils::login(
 ```{r edi-evaluate, eval=TRUE, echo=TRUE, message=TRUE}
 
 evaluation <- EDIutils::evaluate_data_package(
-  eml         = paste0(packageIdent, ".xml"),
+  eml         = paste(scope, identifier, version, "xml", sep = "."),
   useChecksum = FALSE,
   env         = "staging"
 )
 
-Sys.sleep(10)
+Sys.sleep(8)
 
 eval_status <- EDIutils::check_status_evaluate(
   transaction = evaluation,
@@ -674,7 +663,7 @@ eval_status <- EDIutils::check_status_evaluate(
 
 if (eval_status) {
 
-  # evalution summary
+  # evaluation summary
 
   EDIutils::read_evaluate_report_summary(
     transaction = evaluation,
@@ -683,11 +672,11 @@ if (eval_status) {
 
 }
 
-# evalution detailed
+# evaluation detailed
 
 # EDIutils::read_evaluate_report(
 #   transaction = evaluation,
-#   env         = "production"
+#   env         = "staging"
 # )
 
 ```
@@ -697,7 +686,8 @@ if (eval_status) {
 ```{r edi-update, eval=TRUE, echo=TRUE, message=TRUE}
 
 EDIutils::update_data_package(
-  eml         = paste0(packageIdent, ".xml"),
+  eml         = paste(scope, identifier, version, "xml", sep = "."),
+  useChecksum = TRUE,
   env         = "production"
 )
 
@@ -709,4 +699,24 @@ EDIutils::update_data_package(
 
 EDIutils::logout()
 
+```
+
+
+# post processing
+
+remove data files (if desired)
+
+```{r delete-data-files}
+
+file.remove(data_files_to_upload)
+```
+
+XML/EML file to Amazon and cap-metadata
+
+```{r delete-data-files}
+
+gioseml::eml_to_amz(list.files(pattern = "knb.+xml"))
+
+file.copy(list.files(pattern = "knb.+xml"), "/home/srearl/localRepos/cap-metadata/cap-data-eml/")
+file.remove(list.files(pattern = "knb.+xml"))
 ```
