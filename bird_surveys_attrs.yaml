@@ -48,7 +48,7 @@
   sight_obstruct:
     attributeName: sight_obstruct
     attributeDefinition: 'per cent of the view obstructed during the survey (not recorded prior to 2004-10-02)'
-    unit: 'percent'
+    unit: PERCENT
     numberType: whole
     minimum: 0
     maximum: 100

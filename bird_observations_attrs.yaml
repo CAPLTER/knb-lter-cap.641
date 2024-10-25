@@ -50,7 +50,7 @@
   bird_count:
     attributeName: bird_count
     attributeDefinition: 'quantity of the observed taxon'
-    unit: 'number'
+    unit: NUM
     numberType: natural
     minimum: 1
     maximum: 700

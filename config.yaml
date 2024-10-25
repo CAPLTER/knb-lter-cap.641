@@ -1,6 +1,6 @@
 scope: knb-lter-cap
 identifier: 641
-baseURL: https://data.gios.asu.edu/datasets/cap/
+baseURL: https://gios-data.s3.us-west-2.amazonaws.com/datasets/cap/
 project: lter
 title: 'Point-count bird censusing: long-term monitoring of bird abundance and diversity along the Salt River in the greater Phoenix metropolitan area, ongoing since 2013'
 maintenance: regular

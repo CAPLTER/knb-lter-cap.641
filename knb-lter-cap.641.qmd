@@ -1,8 +1,6 @@
 ---
 title: "knb-lter-cap.641"
-output: html_document
-editor_options: 
-  chunk_output_type: console
+author: CAP LTER
 ---
 
 # README
@@ -17,71 +15,76 @@ note that this select statement does not include wind speed, wind dir, air
 temp, or cloud cover as those variables have not been collected for a long time
 and are not relevant to the more recent SRBP observations
 
-```{r srbp-bird-observations}
+```{r}
+#| eval: TRUE
+#| label: srbp_bird_observations
 
-bird_observations <- DBI::dbGetQuery(pg, "
-SELECT
-  surveys.id AS survey_id,
-  SPLIT_PART(sites.site_code, '_', 1) AS reach,
-  sites.site_code,
-  surveys.survey_date,
-  surveys.time_start,
-  surveys.time_end,
-  observers.observer,
-  bird_taxa.code,
-  bird_taxa.common_name,
-  bird_observations.distance,
-  bird_observations.bird_count,
-  bird_observations.notes AS observation_notes,
-  bird_observations.seen,
-  bird_observations.heard,
-  bird_observations.direction,
-  bird_observations.qccomment
-FROM core_birds.surveys
-JOIN core_birds.sites ON (surveys.site_id = sites.id)
-JOIN core_birds.bird_observations ON (bird_observations.survey_id = surveys.id)
-JOIN core_birds.bird_taxa ON (bird_observations.bird_taxon_id = bird_taxa.id)
-JOIN core_birds.observers ON (observers.id = surveys.observer_id)
-WHERE
-surveys.id IN (
+bird_observations <- DBI::dbGetQuery(
+  conn      = pg,
+  statement = "
   SELECT
-    srbp_surveys.id
-  FROM(
+    surveys.id AS survey_id,
+    SPLIT_PART(sites.site_code, '_', 1) AS reach,
+    sites.site_code,
+    surveys.survey_date,
+    surveys.time_start,
+    surveys.time_end,
+    observers.observer,
+    bird_taxa.code,
+    bird_taxa.common_name,
+    bird_observations.distance,
+    bird_observations.bird_count,
+    bird_observations.notes AS observation_notes,
+    bird_observations.seen,
+    bird_observations.heard,
+    bird_observations.direction,
+    bird_observations.qccomment
+  FROM core_birds.surveys
+  JOIN core_birds.sites ON (surveys.site_id = sites.id)
+  JOIN core_birds.bird_observations ON (bird_observations.survey_id = surveys.id)
+  JOIN core_birds.bird_taxa ON (bird_observations.bird_taxon_id = bird_taxa.id)
+  JOIN core_birds.observers ON (observers.id = surveys.observer_id)
+  WHERE
+  surveys.id IN (
     SELECT
-      surveys.id,
-      sites.site_code,
-      SPLIT_PART(sites.site_code, '_', 1) AS reach,
-      surveys.survey_date,
-      observers.observer
-    FROM core_birds.surveys
-    JOIN core_birds.sites ON (surveys.site_id = sites.id)
-    JOIN core_birds.observers ON (observers.id = surveys.observer_id)
-    JOIN (
+      srbp_surveys.id
+    FROM(
       SELECT
+        surveys.id,
+        sites.site_code,
         SPLIT_PART(sites.site_code, '_', 1) AS reach,
         surveys.survey_date,
         observers.observer
       FROM core_birds.surveys
       JOIN core_birds.sites ON (surveys.site_id = sites.id)
       JOIN core_birds.observers ON (observers.id = surveys.observer_id)
-      WHERE
-        sites.location_type LIKE 'SRBP'
-      GROUP BY
-        reach,
-        surveys.survey_date,
-        observers.observer
-      HAVING
-      count(*) > 1
-      ) AS subquery ON (
-        reach = subquery.reach AND
-        surveys.survey_date = subquery.survey_date AND
-        observers.observer  = subquery.observer
-    )
-  ) AS srbp_surveys
+      JOIN (
+        SELECT
+          SPLIT_PART(sites.site_code, '_', 1) AS reach,
+          surveys.survey_date,
+          observers.observer
+        FROM core_birds.surveys
+        JOIN core_birds.sites ON (surveys.site_id = sites.id)
+        JOIN core_birds.observers ON (observers.id = surveys.observer_id)
+        WHERE
+          sites.location_type LIKE 'SRBP'
+        GROUP BY
+          reach,
+          surveys.survey_date,
+          observers.observer
+        HAVING
+        count(*) > 1
+        ) AS subquery ON (
+          reach = subquery.reach AND
+          surveys.survey_date = subquery.survey_date AND
+          observers.observer  = subquery.observer
+      )
+    ) AS srbp_surveys
+  )
+  ORDER BY surveys.survey_date
+  ;
+  "
 )
-ORDER BY surveys.survey_date
-;
-")
 
 bird_observations[bird_observations == ""] <- NA # lots of missing values, convert to NA
 
@@ -89,7 +92,9 @@ bird_observations[bird_observations == ""] <- NA # lots of missing values, conve
 
 ## observations: observers
 
-```{r bird-observations-observers, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_observations_observers
 
 bird_observations <- bird_observations |>
   tidyr::separate(observer, c("name1", "name2", "name3"), " ", remove = T) |>
@@ -115,7 +120,9 @@ bird_observations <- bird_observations |>
 
 ## observations: conversions
 
-```{r bird-observations-conversions, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_observations_conversions
 
 bird_observations <- bird_observations |>
   dplyr::mutate(
@@ -143,21 +150,25 @@ the full sample set to only those data that are QC'd in this workflow.
 Addressed at this step as survey_date has been explicitly declared a date type
 in the above chunk.
 
-```{r bird-observations-filter, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_observations_filter
 
 bird_observations <- bird_observations |>
-  dplyr::filter(survey_date <= "2019-09-01")
+  dplyr::filter(survey_date <= "2024-02-22")
 
 ```
 
 ## observations: data table
 
-```{r bird-observations-DT, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_observations_DT
 
-try({
-  capeml::write_attributes(bird_observations, overwrite = FALSE)
-  capeml::write_factors(bird_observations, overwrite = FALSE)
-})
+# try({
+#   capeml::write_attributes(bird_observations, overwrite = FALSE)
+#   capeml::write_factors(bird_observations, overwrite = FALSE)
+# })
 
 ```
 
@@ -165,7 +176,9 @@ try({
 
 ## surveys: query
 
-```{r bird-surveys-query, eval=TRUE, echo=TRUE, message=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_surveys_query
 
 bird_surveys <- DBI::dbGetQuery(pg, "
 SELECT
@@ -245,7 +258,9 @@ bird_surveys[bird_surveys == ""] <- NA
 
 ## surveys: observers
 
-```{r bird-surveys-observers, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_surveys_observers
 
 bird_surveys <- bird_surveys |>
   tidyr::separate(observer, c("name1", "name2", "name3"), " ", remove = T) |>
@@ -271,7 +286,9 @@ bird_surveys <- bird_surveys |>
 
 ## surveys: conversions
 
-```{r bird-surveys-conversions, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_surveys_conversions
 
 bird_surveys <- bird_surveys |>
   dplyr::mutate(
@@ -299,23 +316,25 @@ the full sample set to only those data that are QC'd in this workflow.
 Addressed at this step as survey_date has been explicitly declared a date type
 in the above chunk.
 
-```{r bird-surveys-filter, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_surveys_filter
 
 bird_surveys <- bird_surveys |>
-  dplyr::filter(survey_date <= "2019-09-01")
+  dplyr::filter(survey_date <= "2024-02-22")
 
 ```
 
 ## surveys: data table
 
-```{r bird-surveys, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: bird_surveys
 
-dplyr::glimpse(bird_surveys)
-
-try({
-  capeml::write_attributes(bird_surveys, overwrite = FALSE)
-  capeml::write_factors(bird_surveys, overwrite = FALSE)
-})
+# try({
+#   capeml::write_attributes(bird_surveys, overwrite = FALSE)
+#   capeml::write_factors(bird_surveys, overwrite = FALSE)
+# })
 
 ```
 
@@ -327,9 +346,13 @@ relevant so we will publish those details
 
 ## reach characteristics: query
 
-```{r reach-characteristics-query}
+```{r}
+#| eval: TRUE
+#| label: reach_characteristics_query
 
-reach_characteristics <- DBI::dbGetQuery(pg, "
+reach_characteristics <- DBI::dbGetQuery(
+  conn      = pg,
+  statement = "
   SELECT
     s.site_code
   FROM core_birds.sites s
@@ -342,7 +365,9 @@ reach_characteristics <- DBI::dbGetQuery(pg, "
   dplyr::mutate(reach = stringr::str_extract(site_code, "^[^_]+")) |>
   dplyr::select(site_code, reach)
 
-herps_reach_chars <- dbGetQuery(pg, "
+herps_reach_chars <- dbGetQuery(
+  conn      = pg,
+  statement = "
   SELECT
     reach,
     urbanized,
@@ -353,10 +378,10 @@ herps_reach_chars <- dbGetQuery(pg, "
 )
 
 reach_characteristics <- dplyr::inner_join(
-  reach_characteristics,
-  herps_reach_chars,
+  x  = reach_characteristics,
+  y  = herps_reach_chars,
   by = c("reach")
-  ) |>
+) |>
   dplyr::mutate(
     reach     = as.factor(reach),
     urbanized = as.factor(urbanized),
@@ -368,14 +393,16 @@ reach_characteristics <- dplyr::inner_join(
 
 ## reach characteristics: data table
 
-```{r reach-characteristics-table}
+```{r}
+#| eval: TRUE
+#| label: reach_characteristics_table
 
 # reach_characteristics_desc <- "Salt River reach location of each sampling site and general characteristics of that portion of the river where sampling is conducted"
 
-try({
-  capeml::write_attributes(reach_characteristics, overwrite = FALSE)
-  capeml::write_factors(reach_characteristics, overwrite = FALSE)
-})
+# try({
+#   capeml::write_attributes(reach_characteristics, overwrite = FALSE)
+#   capeml::write_factors(reach_characteristics, overwrite = FALSE)
+# })
 
 ```
 
@@ -407,9 +434,13 @@ see core birds for the query if you want only the current sites
 
 ## survey locations: query
 
-```{r survey-locations-query}
+```{r}
+#| eval: TRUE
+#| label: survey_locations_query
 
-survey_locations <- DBI::dbGetQuery(pg, "
+survey_locations <- DBI::dbGetQuery(
+  conn      = pg,
+  statement = "
   SELECT
     sites.site_code,
     location_histories.lat,
@@ -437,15 +468,22 @@ survey_locations <- sf::st_as_sf(
   dplyr::summarise() |>
   sf::st_convex_hull()
 
-mapview::mapview(survey_locations)
+# mapview::mapview(survey_locations)
 
 ```
 
 ## survey locations: vector
 
-```{r survey-locations-vector}
+```{r}
+#| eval: TRUE
+#| label: survey_locations_vector
 
-try(capeml::write_attributes(survey_locations, overwrite = FALSE))
+try(
+  capeml::write_attributes(
+    dfname    = survey_locations,
+    overwrite = FALSE
+  )
+)
 
 survey_locations_desc <- "bird survey locations at select locations along the Salt River in the greater Phoenix metropolitan area; polygons reflect the combined area of all bird survey locations (current and historic) at each river reach"
 
@@ -456,47 +494,11 @@ survey_locations_SV <- capemlGIS::create_vector(
 
 ```
 
-# people
-
-```{r people}
-
-# creators
-
-heather <- gioseml::create_role(
-  firstName = "heather",
-  lastName  = "bateman",
-  roleType  = "creator"
-)
-
-paige <- gioseml::create_role(
-  firstName = "paige",
-  lastName  = "warren",
-  roleType  = "creator"
-)
-
-creators <- list(heather, paige)
-
-# metadata providers
-
-stevan <- gioseml::create_role(
-  firstName = "stevan",
-  lastName  = "earl",
-  roleType  = "meta"
-)
-
-sally <- gioseml::create_role(
-  firstName = "sally",
-  lastName  = "wittlinger",
-  roleType  = "meta"
-)
-
-metadataProvider <- list(sally, stevan)
-
-```
-
 # coverages
 
-```{r coverages}
+```{r}
+#| eval: TRUE
+#| label: coverages
 
 begindate <- as.character(min(bird_surveys$survey_date))
 enddate   <- as.character(max(bird_surveys$survey_date))
@@ -516,7 +518,9 @@ coverage <- EML::set_coverage(
 
 ## taxonomic coverage
 
-```{r taxonomyCleanr, eval=FALSE}
+```{r}
+#| eval: TRUE
+#| label: taxonomyCleanr
 
 my_path <- getwd() # taxonomyCleanr requires a path (to build the taxa_map)
 
@@ -547,137 +551,105 @@ coverage$taxonomicCoverage <- taxaCoverage
 Optionally, provide: scope, abstract, methods, keywords, publication date.
 Projects scopes include lter (default), urex, ltreb, and som.
 
-```{r construct-dataset}
+```{r}
+#| eval: TRUE
+#| label: construct_dataset
 
 dataset <- capeml::create_dataset()
 ```
 
 # eml
 
-```{r construct-eml, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: construct_eml
 
 eml <- capeml::create_eml()
 ```
 
-```{r validate-eml, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: validate_eml
 
 EML::eml_validate(eml)
 ```
 
-```{r eml-to-file, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: eml_to_file
 
-# write the eml to file
 capeml::write_cap_eml()
 ```
 
 # file placement
 
-```{r package-details, eval=TRUE}
+```{r}
+#| eval: TRUE
+#| label: preview_data_file_to_upload
 
-# retrieve package details from config.yaml
-if (!file.exists("config.yaml")) {
-  stop("config.yaml not found")
-}
-package_configs <- capeml::read_package_configuration()
-identifier      <- package_configs$identifier
-scope           <- package_configs$scope
 
-version <- capeml::get_next_version(
-  provided_scope      = scope,
-  provided_identifier = identifier
-)
-
-```
-
-```{r preview_data_file_to_upload}
-
-# preview data set files that will be uploaded to S3
 (data_files_to_upload <- list.files(pattern = "^641_"))
 ```
 
 Move data and final xml files to respective ASU locations.
 
-```{r S3_helper_functions}
+```{r}
+#| eval: TRUE
+#| label: S3_helper_functions
 
-# functions and setting for uploading to S3
-library(aws.s3)
 source("~/Documents/localSettings/aws.s3")
 ```
 
-```{r upload_data_S3}
+```{r}
+#| eval: TRUE
+#| label: upload_data_S3
 
-# upload files to S3
-lapply(data_files_to_upload, gioseml::data_to_amz)
+lapply(data_files_to_upload, capeml::data_to_amz)
 ```
 
 # EDI
 
 ## EDI: login
 
-```{r edi-login, eval=TRUE, echo=TRUE, message=TRUE}
+```{r}
+#| eval: TRUE
+#| label: edi_login
 
-EDIutils::login(
-  userId   = keyring::key_get("edi_user", keyring = "edi"),
-  userPass = keyring::key_get("edi_pass", keyring = "edi")
-)
-
+source("~/Documents/localSettings/edi.R")
 ```
 
 ## EDI: evaluate
 
-```{r edi-evaluate, eval=TRUE, echo=TRUE, message=TRUE}
+```{r}
+#| eval = TRUE
+#| echo = TRUE
+#| message = TRUE
+#| label = edi_evaluate
 
-evaluation <- EDIutils::evaluate_data_package(
-  eml         = paste(scope, identifier, version, "xml", sep = "."),
-  useChecksum = FALSE,
-  env         = "staging"
-)
-
-Sys.sleep(8)
-
-eval_status <- EDIutils::check_status_evaluate(
-  transaction = evaluation,
-  env         = "staging"
-)
-
-if (eval_status) {
-
-  # evaluation summary
-
-  EDIutils::read_evaluate_report_summary(
-    transaction = evaluation,
-    env         = "staging"
-  )
-
-}
-
-# evaluation detailed
-
-# EDIutils::read_evaluate_report(
-#   transaction = evaluation,
-#   env         = "staging"
-# )
-
+capeml::get_package_evaluation(full_report = FALSE)
+# report <- capeml::get_package_evaluation(full_report = TRUE)
 ```
 
 ## EDI: update
 
-```{r edi-update, eval=TRUE, echo=TRUE, message=TRUE}
+```{r}
+#| eval: TRUE
+#| label: edi_update
 
-EDIutils::update_data_package(
-  eml         = paste(scope, identifier, version, "xml", sep = "."),
-  useChecksum = TRUE,
-  env         = "production"
+capeml::create_package(
+  environment = "production",
+  update      = TRUE
 )
 
 ```
 
 ## EDI: logout
 
-```{r edi-logout, eval=TRUE, echo=TRUE, message=TRUE}
+```{r}
+#| eval: TRUE
+#| label: edi_logout
 
 EDIutils::logout()
-
 ```
 
 
@@ -685,16 +657,20 @@ EDIutils::logout()
 
 remove data files (if desired)
 
-```{r delete-data-files}
+```{r}
+#| eval: TRUE
+#| label: delete_data_files
 
 file.remove(data_files_to_upload)
 ```
 
 XML/EML file to Amazon and cap-metadata
 
-```{r delete-data-files}
+```{r}
+#| eval: TRUE
+#| label: delete_data_files
 
-gioseml::eml_to_amz(list.files(pattern = "knb.+xml"))
+capeml::eml_to_amz(list.files(pattern = "knb.+xml"))
 
 file.copy(list.files(pattern = "knb.+xml"), "/home/srearl/localRepos/cap-metadata/cap-data-eml/")
 file.remove(list.files(pattern = "knb.+xml"))
